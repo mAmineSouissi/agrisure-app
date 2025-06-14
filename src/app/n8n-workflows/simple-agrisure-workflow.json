@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "instanceId": "simple-agrisure"
+  },
+  "name": "Simple AgriSure Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agrisure-simple",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-simple",
+      "name": "AgriSure Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "agrisure-simple-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Traitement simple des données AgriSure\nconst inputData = $input.first().json;\n\n// Simuler une analyse IA\nconst analysis = {\n  farmId: inputData.farmId || 1,\n  timestamp: new Date().toISOString(),\n  status: 'processed',\n  aiAnalysis: {\n    riskLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)],\n    confidence: Math.floor(Math.random() * 30) + 70, // 70-100%\n    recommendations: [\n      'Surveillance continue recommandée',\n      'Conditions optimales pour les cultures',\n      'Aucune action immédiate requise'\n    ]\n  },\n  sensors: {\n    soilHumidity: Math.floor(Math.random() * 40) + 20, // 20-60%\n    temperature: Math.floor(Math.random() * 15) + 25, // 25-40°C\n    ph: (Math.random() * 2 + 6).toFixed(1) // 6.0-8.0\n  }\n};\n\nconsole.log('🌾 AgriSure Analysis:', analysis);\n\nreturn analysis;"
+      },
+      "id": "process-data",
+      "name": "Process AgriSure Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"message\": \"AgriSure data processed successfully\",\n  \"data\": $json\n} }}"
+      },
+      "id": "response-simple",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "AgriSure Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process AgriSure Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process AgriSure Data": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "simple-agrisure-workflow",
+  "tags": []
+}

@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "instanceId": "agrisure-sensor-processing"
+  },
+  "name": "AgriSure Sensor Processing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sensor-data-processing",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-sensor",
+      "name": "Sensor Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "sensor-processing-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analyser les données des capteurs Irwise\nconst sensorData = $input.first().json;\n\n// Données par défaut si non fournies\nconst data = {\n  farmId: sensorData.farmId || 1,\n  soilHumidity: sensorData.soilHumidity || (15 + Math.random() * 10),\n  soilTemperature: sensorData.soilTemperature || (25 + Math.random() * 15),\n  salinity: sensorData.salinity || (0.1 + Math.random() * 0.3),\n  ph: sensorData.ph || (6.5 + Math.random() * 1),\n  timestamp: new Date().toISOString()\n};\n\n// Définir les seuils critiques\nconst thresholds = {\n  soilHumidity: { min: 15, max: 80, critical: 10 },\n  soilTemperature: { min: 10, max: 35, critical: 40 },\n  salinity: { min: 0.1, max: 2.0, critical: 3.0 },\n  ph: { min: 6.0, max: 8.0, critical: 5.0 }\n};\n\n// Détecter les anomalies\nlet anomalies = [];\nlet riskLevel = 'low';\n\n// Vérifier l'humidité du sol\nif (data.soilHumidity < thresholds.soilHumidity.critical) {\n  anomalies.push({\n    type: 'severe_drought',\n    parameter: 'soilHumidity',\n    value: data.soilHumidity,\n    threshold: thresholds.soilHumidity.critical,\n    severity: 9,\n    message: `Sécheresse sévère détectée: ${data.soilHumidity.toFixed(1)}%`\n  });\n  riskLevel = 'critical';\n} else if (data.soilHumidity < thresholds.soilHumidity.min) {\n  anomalies.push({\n    type: 'drought',\n    parameter: 'soilHumidity',\n    value: data.soilHumidity,\n    threshold: thresholds.soilHumidity.min,\n    severity: Math.max(1, 8 - Math.floor(data.soilHumidity / 2)),\n    message: `Sécheresse détectée: ${data.soilHumidity.toFixed(1)}%`\n  });\n  riskLevel = 'high';\n}\n\n// Vérifier la température du sol\nif (data.soilTemperature > thresholds.soilTemperature.critical) {\n  anomalies.push({\n    type: 'extreme_heat',\n    parameter: 'soilTemperature',\n    value: data.soilTemperature,\n    threshold: thresholds.soilTemperature.critical,\n    severity: 10,\n    message: `Chaleur extrême: ${data.soilTemperature.toFixed(1)}°C`\n  });\n  riskLevel = 'critical';\n} else if (data.soilTemperature > thresholds.soilTemperature.max) {\n  anomalies.push({\n    type: 'high_soil_temperature',\n    parameter: 'soilTemperature',\n    value: data.soilTemperature,\n    threshold: thresholds.soilTemperature.max,\n    severity: Math.min(8, Math.floor((data.soilTemperature - 35) / 2) + 5),\n    message: `Température du sol élevée: ${data.soilTemperature.toFixed(1)}°C`\n  });\n  if (riskLevel !== 'critical') riskLevel = 'high';\n}\n\n// Vérifier la salinité\nif (data.salinity > thresholds.salinity.critical) {\n  anomalies.push({\n    type: 'extreme_salinity',\n    parameter: 'salinity',\n    value: data.salinity,\n    threshold: thresholds.salinity.critical,\n    severity: 9,\n    message: `Salinité critique: ${data.salinity.toFixed(2)} dS/m`\n  });\n  riskLevel = 'critical';\n} else if (data.salinity > thresholds.salinity.max) {\n  anomalies.push({\n    type: 'high_salinity',\n    parameter: 'salinity',\n    value: data.salinity,\n    threshold: thresholds.salinity.max,\n    severity: Math.min(7, Math.floor((data.salinity - 2) * 3) + 4),\n    message: `Salinité élevée: ${data.salinity.toFixed(2)} dS/m`\n  });\n  if (riskLevel === 'low') riskLevel = 'medium';\n}\n\n// Calculer le score de santé global\nconst maxSeverity = anomalies.length > 0 ? Math.max(...anomalies.map(a => a.severity)) : 0;\nconst healthScore = Math.max(0, 100 - (anomalies.length * 15) - (maxSeverity * 5));\n\n// Générer des recommandations\nfunction generateRecommendations(anomalies) {\n  const recommendations = [];\n  \n  anomalies.forEach(anomaly => {\n    switch(anomaly.type) {\n      case 'severe_drought':\n      case 'drought':\n        recommendations.push('🚨 Irrigation immédiate requise');\n        recommendations.push('💧 Vérifier le système d\\'arrosage');\n        recommendations.push('🌱 Considérer des cultures résistantes à la sécheresse');\n        break;\n      case 'extreme_heat':\n      case 'high_soil_temperature':\n        recommendations.push('☂️ Ombrage des cultures recommandé');\n        recommendations.push('💦 Augmenter la fréquence d\\'arrosage');\n        recommendations.push('🌾 Éviter les travaux aux heures chaudes');\n        break;\n      case 'extreme_salinity':\n      case 'high_salinity':\n        recommendations.push('🧂 Rinçage du sol nécessaire');\n        recommendations.push('🚫 Réduire les fertilisants salins');\n        recommendations.push('🌿 Planter des cultures tolérantes au sel');\n        break;\n    }\n  });\n  \n  if (recommendations.length === 0) {\n    recommendations.push('✅ Conditions optimales - continuer la surveillance');\n  }\n  \n  return [...new Set(recommendations)]; // Supprimer les doublons\n}\n\nconst result = {\n  ...data,\n  anomalies,\n  anomalyDetected: anomalies.length > 0,\n  riskLevel,\n  healthScore,\n  recommendations: generateRecommendations(anomalies),\n  needsPayment: anomalies.some(a => a.severity >= 7),\n  maxSeverity\n};\n\nconsole.log('📊 Analyse des capteurs:', {\n  farmId: result.farmId,\n  anomalies: result.anomalies.length,\n  riskLevel: result.riskLevel,\n  healthScore: result.healthScore\n});\n\nreturn result;"
+      },
+      "id": "analyze-sensor-data",
+      "name": "Analyze Sensor Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-payment",
+              "leftValue": "={{ $json.needsPayment }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-payment-needed",
+      "name": "Check Payment Needed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simuler le déclenchement d'un paiement automatique\nconst sensorData = $input.first().json;\nconst highestSeverityAnomaly = sensorData.anomalies.reduce((max, current) => \n  current.severity > max.severity ? current : max\n);\n\n// Calculer le montant du paiement\nconst baseAmount = 10; // HBAR de base\nconst severityMultiplier = highestSeverityAnomaly.severity;\nconst paymentAmount = baseAmount * severityMultiplier;\n\n// Générer un ID de transaction simulé\nconst transactionId = `HBAR_AUTO_${Date.now()}_${Math.random().toString(36).substr(2, 6).toUpperCase()}`;\n\nconst paymentResult = {\n  success: true,\n  farmerId: `farmer_${sensorData.farmId}`,\n  amount: paymentAmount,\n  currency: 'HBAR',\n  transactionId,\n  eventType: highestSeverityAnomaly.type,\n  severity: highestSeverityAnomaly.severity,\n  timestamp: new Date().toISOString(),\n  message: `Paiement automatique de ${paymentAmount} HBAR déclenché pour ${highestSeverityAnomaly.type}`\n};\n\nconsole.log('💰 PAIEMENT AUTOMATIQUE:', paymentResult);\n\nreturn {\n  ...sensorData,\n  payment: paymentResult\n};"
+      },
+      "id": "trigger-payment",
+      "name": "Trigger Payment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "response",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 400]
+    }
+  ],
+  "connections": {
+    "Sensor Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze Sensor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Sensor Data": {
+      "main": [
+        [
+          {
+            "node": "Check Payment Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Payment Needed": {
+      "main": [
+        [
+          {
+            "node": "Trigger Payment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Payment": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "sensor-processing-workflow",
+  "tags": []
+}

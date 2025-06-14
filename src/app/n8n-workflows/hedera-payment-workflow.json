@@ -1,0 +1,153 @@
+{
+  "name": "AgriSure Hedera Payment",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hedera-payment",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-payment",
+      "name": "Payment Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Valider les données de paiement\nconst paymentData = $input.first().json;\n\n// Vérifications de sécurité\nif (!paymentData.farmerId || !paymentData.amount || !paymentData.eventType) {\n  throw new Error('Données de paiement incomplètes');\n}\n\nif (paymentData.amount > 1000) {\n  throw new Error('Montant trop élevé pour un paiement automatique');\n}\n\n// Calculer les frais\nconst fees = Math.max(0.1, paymentData.amount * 0.01); // 1% ou minimum 0.1 HBAR\nconst netAmount = paymentData.amount - fees;\n\n// Générer un ID de transaction unique\nconst transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\nreturn {\n  ...paymentData,\n  fees,\n  netAmount,\n  transactionId,\n  timestamp: new Date().toISOString(),\n  status: 'validated'\n};"
+      },
+      "id": "validate-payment",
+      "name": "Validate Payment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/hedera/process-payment",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "farmerId",
+              "value": "={{ $json.farmerId }}"
+            },
+            {
+              "name": "amount",
+              "value": "={{ $json.netAmount }}"
+            },
+            {
+              "name": "transactionId",
+              "value": "={{ $json.transactionId }}"
+            },
+            {
+              "name": "eventType",
+              "value": "={{ $json.eventType }}"
+            }
+          ]
+        }
+      },
+      "id": "process-hedera-payment",
+      "name": "Process Hedera Payment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/supabase/record-payment",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "farmerId",
+              "value": "={{ $json.farmerId }}"
+            },
+            {
+              "name": "amount",
+              "value": "={{ $json.netAmount }}"
+            },
+            {
+              "name": "transactionId",
+              "value": "={{ $json.transactionId }}"
+            },
+            {
+              "name": "status",
+              "value": "completed"
+            },
+            {
+              "name": "eventType",
+              "value": "={{ $json.eventType }}"
+            }
+          ]
+        }
+      },
+      "id": "record-payment",
+      "name": "Record Payment in Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"transactionId\": $json.transactionId, \"amount\": $json.netAmount, \"status\": \"completed\" } }}"
+      },
+      "id": "response",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Payment Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Payment": {
+      "main": [
+        [
+          {
+            "node": "Process Hedera Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Hedera Payment": {
+      "main": [
+        [
+          {
+            "node": "Record Payment in Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Payment in Database": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}

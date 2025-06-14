@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "instanceId": "agrisure-weather-monitoring"
+  },
+  "name": "AgriSure Weather Monitoring",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "weather-monitoring",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-weather",
+      "name": "Weather Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "weather-monitoring-webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lat",
+              "value": "={{ $json.latitude || 45.5 }}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ $json.longitude || -73.6 }}"
+            },
+            {
+              "name": "appid",
+              "value": "demo_key"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-weather-data",
+      "name": "Get Weather Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analyser les données météo\nconst weatherData = $input.first().json;\nconst farmData = $('Weather Webhook').first().json;\n\n// Simuler des données météo si l'API échoue\nconst mockWeather = {\n  main: {\n    temp: 32 + Math.random() * 10, // 32-42°C\n    humidity: 20 + Math.random() * 60, // 20-80%\n    pressure: 1013\n  },\n  weather: [{\n    main: 'Clear',\n    description: 'clear sky'\n  }],\n  wind: {\n    speed: 5 + Math.random() * 10 // 5-15 m/s\n  }\n};\n\nconst data = weatherData.main ? weatherData : mockWeather;\n\n// Détecter les alertes\nconst alerts = [];\n\nif (data.main.temp > 35) {\n  alerts.push({\n    type: 'high_temperature',\n    severity: Math.min(10, Math.floor((data.main.temp - 35) / 2) + 6),\n    message: `Température élevée: ${data.main.temp.toFixed(1)}°C`\n  });\n}\n\nif (data.main.humidity < 30) {\n  alerts.push({\n    type: 'low_humidity',\n    severity: Math.max(1, 8 - Math.floor(data.main.humidity / 5)),\n    message: `Humidité faible: ${data.main.humidity}%`\n  });\n}\n\nif (data.wind.speed > 12) {\n  alerts.push({\n    type: 'strong_wind',\n    severity: Math.min(10, Math.floor(data.wind.speed / 2)),\n    message: `Vent fort: ${data.wind.speed} m/s`\n  });\n}\n\nreturn {\n  farmId: farmData.farmId || 1,\n  weather: data,\n  alerts,\n  hasAlerts: alerts.length > 0,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "analyze-weather",
+      "name": "Analyze Weather",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-1",
+              "leftValue": "={{ $json.hasAlerts }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-alerts",
+      "name": "Check for Alerts",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Envoyer une alerte simulée\nconst alertData = $input.first().json;\n\nconsole.log('🚨 ALERTE MÉTÉO:', alertData.alerts);\n\n// Simuler l'envoi d'une notification\nconst notification = {\n  success: true,\n  alertsSent: alertData.alerts.length,\n  farmId: alertData.farmId,\n  timestamp: new Date().toISOString(),\n  message: 'Alertes météo envoyées avec succès'\n};\n\nreturn notification;"
+      },
+      "id": "send-alert",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"farmId\": $json.farmId,\n  \"weather\": $json.weather,\n  \"alerts\": $json.alerts || [],\n  \"message\": \"Weather monitoring completed\",\n  \"timestamp\": $json.timestamp\n} }}"
+      },
+      "id": "response",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 400]
+    }
+  ],
+  "connections": {
+    "Weather Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Weather Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather Data": {
+      "main": [
+        [
+          {
+            "node": "Analyze Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Weather": {
+      "main": [
+        [
+          {
+            "node": "Check for Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Alerts": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Alert": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "weather-monitoring-workflow",
+  "tags": []
+}
