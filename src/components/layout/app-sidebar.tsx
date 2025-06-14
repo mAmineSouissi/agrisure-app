@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
   Shield,
@@ -22,14 +22,18 @@ import {
   BarChart3,
   FileText,
   Activity,
-} from "lucide-react"
+  LogOut,
+} from "lucide-react";
+import { useAuth } from "@/components/auth/auth-provider";
 
 interface AppSidebarProps {
-  onNavigate: (page: string) => void
-  currentPage: string
+  onNavigate: (page: string) => void;
+  currentPage: string;
 }
 
 export function AppSidebar({ onNavigate, currentPage }: AppSidebarProps) {
+  const { signOut } = useAuth();
+
   const mainMenuItems = [
     {
       title: "Tableau de bord",
@@ -56,7 +60,7 @@ export function AppSidebar({ onNavigate, currentPage }: AppSidebarProps) {
       icon: History,
       page: "history",
     },
-  ]
+  ];
 
   const projectMenuItems = [
     {
@@ -74,7 +78,7 @@ export function AppSidebar({ onNavigate, currentPage }: AppSidebarProps) {
       icon: Activity,
       page: "monitoring",
     },
-  ]
+  ];
 
   return (
     <Sidebar>
@@ -83,7 +87,9 @@ export function AppSidebar({ onNavigate, currentPage }: AppSidebarProps) {
           <Shield className="h-8 w-8 text-green-600" />
           <div>
             <h2 className="text-lg font-bold text-green-800">AgriSure</h2>
-            <p className="text-xs text-muted-foreground">Assurance Climatique IA</p>
+            <p className="text-xs text-muted-foreground">
+              Assurance Climatique IA
+            </p>
           </div>
         </div>
       </SidebarHeader>
@@ -94,7 +100,10 @@ export function AppSidebar({ onNavigate, currentPage }: AppSidebarProps) {
             <SidebarMenu>
               {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.page}>
-                  <SidebarMenuButton onClick={() => onNavigate(item.page)} isActive={currentPage === item.page}>
+                  <SidebarMenuButton
+                    onClick={() => onNavigate(item.page)}
+                    isActive={currentPage === item.page}
+                  >
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -110,7 +119,10 @@ export function AppSidebar({ onNavigate, currentPage }: AppSidebarProps) {
             <SidebarMenu>
               {projectMenuItems.map((item) => (
                 <SidebarMenuItem key={item.page}>
-                  <SidebarMenuButton onClick={() => onNavigate(item.page)} isActive={currentPage === item.page}>
+                  <SidebarMenuButton
+                    onClick={() => onNavigate(item.page)}
+                    isActive={currentPage === item.page}
+                  >
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -130,11 +142,24 @@ export function AppSidebar({ onNavigate, currentPage }: AppSidebarProps) {
                   <span>Paramètres</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={async () => {
+                    await signOut();
+                    // Optionally, redirect to login or landing page if needed
+                  }}
+                >
+                  <span className="h-4 w-4 flex items-center justify-center">
+                    <LogOut className="h-4 w-4 mr-1" />
+                  </span>
+                  <span>Déconnexion</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
