@@ -17,13 +17,30 @@ import {
   Zap,
   Brain,
 } from "lucide-react"
+import { useDashboardData } from "@/app/hooks/use-supabase-data" // or the correct path
+
+interface RiskDataItem {
+  risk: string
+  probability: string
+  impact: string
+  color: string
+}
 
 interface DashboardPageProps {
   onNavigate: (page: string) => void
 }
 
 export function DashboardPage({ onNavigate }: DashboardPageProps) {
-  const riskData = [
+  const { data, loading, error } = useDashboardData()
+
+  // Example fallback if data is not loaded yet
+  const coverage = data?.coverage || 0
+  const protectedDays = data?.protectedDays || 0
+  const paymentsReceived = data?.payments?.length || 0
+  const smartContracts = data?.contracts?.length || 0
+
+  // Example: riskData from backend or AI
+  const riskData = data?.riskData || [
     { risk: "Sécheresse", probability: "70%", impact: "Élevé", color: "destructive" },
     { risk: "Inondation", probability: "20%", impact: "Modéré", color: "secondary" },
     { risk: "Grêle", probability: "15%", impact: "Faible", color: "outline" },
@@ -106,7 +123,9 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               <DollarSign className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Couverture totale</p>
-                <p className="text-2xl font-bold text-green-600">2,500 $</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {loading ? "..." : `${coverage.toLocaleString()} $`}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -117,7 +136,9 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               <Calendar className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Jours protégés</p>
-                <p className="text-2xl font-bold text-blue-600">127</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {loading ? "..." : protectedDays}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -128,7 +149,9 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               <CheckCircle className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Paiements reçus</p>
-                <p className="text-2xl font-bold text-green-600">3</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {loading ? "..." : paymentsReceived}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -139,7 +162,9 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               <Code className="h-5 w-5 text-purple-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Smart Contracts</p>
-                <p className="text-2xl font-bold text-purple-600">3</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {loading ? "..." : smartContracts}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -269,14 +294,14 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {riskData.map((item, index) => (
+                {riskData.map((item: RiskDataItem, index: number) => (
                   <tr key={index} className={index % 2 === 0 ? "bg-muted/50" : ""}>
-                    <td className="p-3 font-medium">{item.risk}</td>
-                    <td className="p-3 text-center font-semibold">{item.probability}</td>
-                    <td className="p-3 text-center">{item.impact}</td>
-                    <td className="p-3 text-center">
-                      <Badge variant={item.color as any}>{item.impact}</Badge>
-                    </td>
+                  <td className="p-3 font-medium">{item.risk}</td>
+                  <td className="p-3 text-center font-semibold">{item.probability}</td>
+                  <td className="p-3 text-center">{item.impact}</td>
+                  <td className="p-3 text-center">
+                    <Badge variant={item.color as any}>{item.impact}</Badge>
+                  </td>
                   </tr>
                 ))}
               </tbody>
