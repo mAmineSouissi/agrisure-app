@@ -107,7 +107,7 @@ export function SignInPage({ onSwitchToSignUp }: SignInPageProps) {
                   onClick={onSwitchToSignUp}
                   className="text-green-600 hover:text-green-700 font-medium"
                 >
-                  S'inscrire
+                  S&apos;inscrire
                 </button>
               </div>
             </CardFooter>

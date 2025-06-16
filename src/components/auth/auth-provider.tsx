@@ -20,7 +20,7 @@ export function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
-}): JSX.Element {
+}){
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);

@@ -65,7 +65,7 @@ export function SignUpPage({ onSwitchToSignIn }: SignUpPageProps) {
         <Card>
           <CardHeader>
             <CardTitle>Créer un compte</CardTitle>
-            <CardDescription>Rejoignez des milliers d'agriculteurs protégés</CardDescription>
+            <CardDescription>Rejoignez des milliers d&apos;agriculteurs protégés</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">

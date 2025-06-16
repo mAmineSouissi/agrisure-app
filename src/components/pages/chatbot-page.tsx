@@ -24,7 +24,7 @@ interface Message {
   suggestions?: string[];
 }
 
-export function ChatbotPage(): JSX.Element {
+export function ChatbotPage(){
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,

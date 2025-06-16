@@ -372,9 +372,13 @@ export class N8nService {
 
   private simulateCropRecommendations(
     farmId: number,
-    weatherData: WeatherData,
-    soilData: SensorData
+    _weatherData: WeatherData,
+    _soilData: SensorData
   ): CropRecommendation[] {
+    // Use parameters to avoid lint error
+    void _weatherData;
+    void _soilData;
+
     console.log(
       `🌱 [SIMULATION] Génération recommandations pour ferme ${farmId}`
     );

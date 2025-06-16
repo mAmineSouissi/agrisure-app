@@ -925,7 +925,7 @@ export function HistoryPage(): JSX.Element {
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-              <span>Chargement de l'historique...</span>
+              <span>Chargement de l&apos;historique...</span>
             </div>
           ) : filteredEvents.length === 0 ? (
             <Card>

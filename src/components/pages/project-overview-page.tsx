@@ -659,7 +659,7 @@ export function ProjectOverviewPage(): JSX.Element {
         return (
           <div className="space-y-1">
             <div>
-              <span className="font-medium">Nombre d'agents:</span>{" "}
+              <span className="font-medium">Nombre d&apos;agents:</span>{" "}
               {(details.agentCount as number) || "N/A"}
             </div>
             <div>
@@ -702,7 +702,7 @@ export function ProjectOverviewPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-green-800">
-            Vue d'ensemble du Projet AgriSure
+            Vue d&apos;ensemble du Projet AgriSure
           </h1>
           <p className="text-muted-foreground">
             Données en temps réel • Dernière mise à jour:{" "}
@@ -905,8 +905,8 @@ export function ProjectOverviewPage(): JSX.Element {
               <div className="space-y-4">
                 {projectEvents.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    Aucun événement récent. Utilisez l'application pour générer
-                    de l'activité.
+                    Aucun événement récent. Utilisez l&apos;application pour générer
+                    de l&apos;activité.
                   </p>
                 ) : (
                   projectEvents.map((event, index) => (
