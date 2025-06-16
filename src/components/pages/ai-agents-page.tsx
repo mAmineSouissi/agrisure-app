@@ -1,18 +1,51 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Bot, Cloud, Leaf, BarChart3, Settings, Play, Pause, Activity, Zap, Brain, Database } from "lucide-react"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  Bot,
+  Cloud,
+  Leaf,
+  BarChart3,
+  Settings,
+  Play,
+  Pause,
+  Activity,
+  Zap,
+  Brain,
+  Database,
+} from "lucide-react";
 
-export function AIAgentsPage() {
-  const [agents, setAgents] = useState([
+interface Agent {
+  id: number;
+  name: string;
+  description: string;
+  status: "active" | "standby";
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  lastRun: string;
+  accuracy: string;
+  predictions: number;
+  enabled: boolean;
+}
+
+export function AIAgentsPage(): JSX.Element {
+  const [agents, setAgents] = useState<Agent[]>([
     {
       id: 1,
       name: "Agent Météo",
-      description: "Analyse les données météorologiques et prédit les risques climatiques",
+      description:
+        "Analyse les données météorologiques et prédit les risques climatiques",
       status: "active",
       icon: Cloud,
       color: "text-blue-600",
@@ -61,9 +94,9 @@ export function AIAgentsPage() {
       predictions: 45,
       enabled: false,
     },
-  ])
+  ]);
 
-  const toggleAgent = (id: number) => {
+  const toggleAgent = (id: number): void => {
     setAgents(
       agents.map((agent) =>
         agent.id === id
@@ -72,20 +105,25 @@ export function AIAgentsPage() {
               enabled: !agent.enabled,
               status: !agent.enabled ? "active" : "standby",
             }
-          : agent,
-      ),
-    )
-  }
+          : agent
+      )
+    );
+  };
 
-  const totalPredictions = agents.reduce((sum, agent) => sum + agent.predictions, 0)
-  const activeAgents = agents.filter((agent) => agent.enabled).length
+  const totalPredictions = agents.reduce(
+    (sum, agent) => sum + agent.predictions,
+    0
+  );
+  const activeAgents = agents.filter((agent) => agent.enabled).length;
 
   return (
     <div className="space-y-6">
       {/* En-tête */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-green-800">Agents IA</h1>
-        <p className="text-muted-foreground">Gérez vos agents d'intelligence artificielle pour l'analyse agricole</p>
+        <p className="text-muted-foreground">
+          Gérez vos agents d'intelligence artificielle pour l'analyse agricole
+        </p>
       </div>
 
       {/* Statistiques globales */}
@@ -96,7 +134,9 @@ export function AIAgentsPage() {
               <Bot className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Agents actifs</p>
-                <p className="text-2xl font-bold text-blue-600">{activeAgents}/4</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {activeAgents}/4
+                </p>
               </div>
             </div>
           </CardContent>
@@ -106,8 +146,12 @@ export function AIAgentsPage() {
             <div className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Prédictions totales</p>
-                <p className="text-2xl font-bold text-green-600">{totalPredictions.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">
+                  Prédictions totales
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {totalPredictions.toLocaleString()}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -117,9 +161,17 @@ export function AIAgentsPage() {
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Précision moyenne</p>
+                <p className="text-sm text-muted-foreground">
+                  Précision moyenne
+                </p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {Math.round(agents.reduce((sum, agent) => sum + Number.parseInt(agent.accuracy), 0) / agents.length)}%
+                  {Math.round(
+                    agents.reduce(
+                      (sum, agent) => sum + Number.parseInt(agent.accuracy),
+                      0
+                    ) / agents.length
+                  )}
+                  %
                 </p>
               </div>
             </div>
@@ -150,13 +202,21 @@ export function AIAgentsPage() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">{agent.name}</CardTitle>
-                    <CardDescription className="mt-1">{agent.description}</CardDescription>
+                    <CardDescription className="mt-1">
+                      {agent.description}
+                    </CardDescription>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge
-                    variant={agent.status === "active" ? "default" : "secondary"}
-                    className={agent.status === "active" ? "bg-green-100 text-green-800" : ""}
+                    variant={
+                      agent.status === "active" ? "default" : "secondary"
+                    }
+                    className={
+                      agent.status === "active"
+                        ? "bg-green-100 text-green-800"
+                        : ""
+                    }
                   >
                     {agent.status === "active" ? "Actif" : "En attente"}
                   </Badge>
@@ -167,24 +227,37 @@ export function AIAgentsPage() {
               {/* Métriques */}
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-green-600">{agent.accuracy}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {agent.accuracy}
+                  </p>
                   <p className="text-xs text-muted-foreground">Précision</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-blue-600">{agent.predictions}</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {agent.predictions}
+                  </p>
                   <p className="text-xs text-muted-foreground">Prédictions</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{agent.lastRun}</p>
-                  <p className="text-xs text-muted-foreground">Dernière exécution</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {agent.lastRun}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Dernière exécution
+                  </p>
                 </div>
               </div>
 
               {/* Contrôles */}
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Switch checked={agent.enabled} onCheckedChange={() => toggleAgent(agent.id)} />
-                  <span className="text-sm font-medium">{agent.enabled ? "Activé" : "Désactivé"}</span>
+                  <Switch
+                    checked={agent.enabled}
+                    onCheckedChange={() => toggleAgent(agent.id)}
+                  />
+                  <span className="text-sm font-medium">
+                    {agent.enabled ? "Activé" : "Désactivé"}
+                  </span>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">
@@ -218,22 +291,33 @@ export function AIAgentsPage() {
             <Database className="h-5 w-5 text-purple-600" />
             Intégration n8n
           </CardTitle>
-          <CardDescription>Configuration de l'intégration avec n8n pour l'orchestration des agents IA</CardDescription>
+          <CardDescription>
+            Configuration de l'intégration avec n8n pour l'orchestration des
+            agents IA
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 bg-green-50 rounded-lg">
-              <h4 className="font-semibold text-green-800 mb-2">Statut de connexion</h4>
+              <h4 className="font-semibold text-green-800 mb-2">
+                Statut de connexion
+              </h4>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm text-green-700">Connecté à n8n</span>
               </div>
-              <p className="text-xs text-green-600 mt-1">Dernière synchronisation : Il y a 2 minutes</p>
+              <p className="text-xs text-green-600 mt-1">
+                Dernière synchronisation : Il y a 2 minutes
+              </p>
             </div>
             <div className="p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">Workflows actifs</h4>
+              <h4 className="font-semibold text-blue-800 mb-2">
+                Workflows actifs
+              </h4>
               <p className="text-2xl font-bold text-blue-600">3</p>
-              <p className="text-xs text-blue-600 mt-1">Météo, Cultures, Risques</p>
+              <p className="text-xs text-blue-600 mt-1">
+                Météo, Cultures, Risques
+              </p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -249,5 +333,5 @@ export function AIAgentsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

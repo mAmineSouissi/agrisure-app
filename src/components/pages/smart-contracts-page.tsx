@@ -1,14 +1,26 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Code,
   Zap,
@@ -26,65 +38,72 @@ import {
   ExternalLink,
   Palette,
   Star,
-} from "lucide-react"
+} from "lucide-react";
 
 interface ContractRequirements {
-  insuranceType: string
-  coverageAmount: number
-  premiumAmount: number
-  conditions: string[]
-  triggers: string[]
+  insuranceType: string;
+  coverageAmount: number;
+  premiumAmount: number;
+  conditions: string[];
+  triggers: string[];
 }
 
 interface DeployedContract {
-  id: string
-  name: string
-  address: string
-  status: "active" | "pending" | "inactive"
-  deployedAt: string
-  balance: number
-  totalClaims: number
-  nftTokenId?: number
-  nftImageUrl?: string
+  id: string;
+  name: string;
+  address: string;
+  status: "active" | "pending" | "inactive";
+  deployedAt: string;
+  balance: number;
+  totalClaims: number;
+  nftTokenId?: number;
+  nftImageUrl?: string;
 }
 
 interface NFTData {
-  tokenId: number
-  contractAddress: string
+  tokenId: number;
+  contractAddress: string;
   metadata: {
-    name: string
-    description: string
-    image: string
+    name: string;
+    description: string;
+    image: string;
     attributes: Array<{
-      trait_type: string
-      value: string | number
-    }>
-  }
-  imageUrl: string
-  mintTransactionId: string
-  openseaUrl: string
-  hederaExplorerUrl: string
+      trait_type: string;
+      value: string | number;
+    }>;
+  };
+  imageUrl: string;
+  mintTransactionId: string;
+  openseaUrl: string;
+  hederaExplorerUrl: string;
 }
 
-export function SmartContractsPage() {
-  const [activeTab, setActiveTab] = useState("generator")
-  const [contractRequirements, setContractRequirements] = useState<ContractRequirements>({
-    insuranceType: "Assurance Sécheresse",
-    coverageAmount: 1000,
-    premiumAmount: 50,
-    conditions: ["Humidité du sol < 10%", "Température > 35°C", "Durée > 7 jours"],
-    triggers: ["Capteurs Irwise", "Stations météo", "Satellites"],
-  })
+export function SmartContractsPage(): JSX.Element {
+  const [activeTab, setActiveTab] = useState("generator");
+  const [contractRequirements, setContractRequirements] =
+    useState<ContractRequirements>({
+      insuranceType: "Assurance Sécheresse",
+      coverageAmount: 1000,
+      premiumAmount: 50,
+      conditions: [
+        "Humidité du sol < 10%",
+        "Température > 35°C",
+        "Durée > 7 jours",
+      ],
+      triggers: ["Capteurs Irwise", "Stations météo", "Satellites"],
+    });
 
-  const [generatedContract, setGeneratedContract] = useState("")
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [contractExplanation, setContractExplanation] = useState("")
-  const [isExplaining, setIsExplaining] = useState(false)
-  const [deploymentStatus, setDeploymentStatus] = useState<"idle" | "deploying" | "success" | "error">("idle")
-  const [deployedContractId, setDeployedContractId] = useState("")
-  const [newCondition, setNewCondition] = useState("")
-  const [newTrigger, setNewTrigger] = useState("")
-  const [nftData, setNftData] = useState<NFTData | null>(null)
+  const [generatedContract, setGeneratedContract] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [contractExplanation, setContractExplanation] = useState("");
+  const [isExplaining, setIsExplaining] = useState(false);
+  const [deploymentStatus, setDeploymentStatus] = useState<
+    "idle" | "deploying" | "success" | "error"
+  >("idle");
+  const [deployedContractId, setDeployedContractId] = useState("");
+  const [newCondition, setNewCondition] = useState("");
+  const [newTrigger, setNewTrigger] = useState("");
+  const [nftData, setNftData] = useState<NFTData | null>(null);
 
   // Contrats déployés simulés avec NFTs
   const [deployedContracts] = useState<DeployedContract[]>([
@@ -97,7 +116,8 @@ export function SmartContractsPage() {
       balance: 2500,
       totalClaims: 12,
       nftTokenId: 1,
-      nftImageUrl: "https://agrisure-nft.vercel.app/api/generate-nft/0.0.123456?type=drought&coverage=2500",
+      nftImageUrl:
+        "https://agrisure-nft.vercel.app/api/generate-nft/0.0.123456?type=drought&coverage=2500",
     },
     {
       id: "0.0.789012",
@@ -108,7 +128,8 @@ export function SmartContractsPage() {
       balance: 1800,
       totalClaims: 8,
       nftTokenId: 2,
-      nftImageUrl: "https://agrisure-nft.vercel.app/api/generate-nft/0.0.789012?type=flood&coverage=1800",
+      nftImageUrl:
+        "https://agrisure-nft.vercel.app/api/generate-nft/0.0.789012?type=flood&coverage=1800",
     },
     {
       id: "0.0.345678",
@@ -119,64 +140,63 @@ export function SmartContractsPage() {
       balance: 0,
       totalClaims: 0,
       nftTokenId: 3,
-      nftImageUrl: "https://agrisure-nft.vercel.app/api/generate-nft/0.0.345678?type=hail&coverage=1200",
+      nftImageUrl:
+        "https://agrisure-nft.vercel.app/api/generate-nft/0.0.345678?type=hail&coverage=1200",
     },
-  ])
+  ]);
 
-  const handleGenerateContract = async () => {
-    setIsGenerating(true)
+  const handleGenerateContract = async (): Promise<void> => {
+    setIsGenerating(true);
     try {
       const response = await fetch("/api/hedera/deploy-contract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requirements: contractRequirements }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setGeneratedContract(data.contractCode)
-        setDeployedContractId(data.contractId)
-        setNftData(data.nft) // Nouvelles données NFT
+        setGeneratedContract(data.contractCode);
+        setDeployedContractId(data.contractId);
+        setNftData(data.nft);
       }
     } catch (error) {
-      console.error("Erreur:", error)
+      console.error("Erreur:", error);
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
-  const handleExplainContract = async () => {
-    if (!generatedContract) return
+  const handleExplainContract = async (): Promise<void> => {
+    if (!generatedContract) return;
 
-    setIsExplaining(true)
+    setIsExplaining(true);
     try {
       const response = await fetch("/api/ai/explain-contract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contractCode: generatedContract }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setContractExplanation(data.explanation)
+        setContractExplanation(data.explanation);
       }
     } catch (error) {
-      console.error("Erreur:", error)
+      console.error("Erreur:", error);
     } finally {
-      setIsExplaining(false)
+      setIsExplaining(false);
     }
-  }
+  };
 
-  const handleDeployContract = async () => {
-    if (!generatedContract) return
+  const handleDeployContract = async (): Promise<void> => {
+    if (!generatedContract) return;
 
-    setDeploymentStatus("deploying")
+    setDeploymentStatus("deploying");
     try {
-      // Simulation du déploiement
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-      setDeploymentStatus("success")
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setDeploymentStatus("success");
 
-      // Déclencher un workflow n8n pour notifier le déploiement
       await fetch("/api/n8n/trigger-workflow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -189,58 +209,61 @@ export function SmartContractsPage() {
             nftTokenId: nftData?.tokenId,
           },
         }),
-      })
+      });
     } catch (error) {
-      console.error("Erreur:", error)
-      setDeploymentStatus("error")
+      console.error("Erreur:", error);
+      setDeploymentStatus("error");
     }
-  }
+  };
 
-  const addCondition = () => {
+  const addCondition = (): void => {
     if (newCondition.trim()) {
       setContractRequirements({
         ...contractRequirements,
         conditions: [...contractRequirements.conditions, newCondition.trim()],
-      })
-      setNewCondition("")
+      });
+      setNewCondition("");
     }
-  }
+  };
 
-  const addTrigger = () => {
+  const addTrigger = (): void => {
     if (newTrigger.trim()) {
       setContractRequirements({
         ...contractRequirements,
         triggers: [...contractRequirements.triggers, newTrigger.trim()],
-      })
-      setNewTrigger("")
+      });
+      setNewTrigger("");
     }
-  }
+  };
 
-  const removeCondition = (index: number) => {
+  const removeCondition = (index: number): void => {
     setContractRequirements({
       ...contractRequirements,
       conditions: contractRequirements.conditions.filter((_, i) => i !== index),
-    })
-  }
+    });
+  };
 
-  const removeTrigger = (index: number) => {
+  const removeTrigger = (index: number): void => {
     setContractRequirements({
       ...contractRequirements,
       triggers: contractRequirements.triggers.filter((_, i) => i !== index),
-    })
-  }
+    });
+  };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
+  const copyToClipboard = (text: string): void => {
+    navigator.clipboard.writeText(text);
+  };
 
   return (
     <div className="space-y-6">
       {/* En-tête */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-green-800">Smart Contracts IA + NFT</h1>
+        <h1 className="text-3xl font-bold text-green-800">
+          Smart Contracts IA + NFT
+        </h1>
         <p className="text-muted-foreground">
-          Générez des contrats intelligents avec NFT automatique pour l'assurance agricole
+          Générez des contrats intelligents avec NFT automatique pour
+          l'assurance agricole
         </p>
       </div>
 
@@ -251,8 +274,12 @@ export function SmartContractsPage() {
             <div className="flex items-center gap-2">
               <Code className="h-5 w-5 text-purple-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Contrats déployés</p>
-                <p className="text-2xl font-bold text-purple-600">{deployedContracts.length}</p>
+                <p className="text-sm text-muted-foreground">
+                  Contrats déployés
+                </p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {deployedContracts.length}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -275,9 +302,14 @@ export function SmartContractsPage() {
             <div className="flex items-center gap-2">
               <Coins className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Valeur totale (HBAR)</p>
+                <p className="text-sm text-muted-foreground">
+                  Valeur totale (HBAR)
+                </p>
                 <p className="text-2xl font-bold text-green-600">
-                  {deployedContracts.reduce((sum, contract) => sum + contract.balance, 0)}
+                  {deployedContracts.reduce(
+                    (sum, contract) => sum + contract.balance,
+                    0
+                  )}
                 </p>
               </div>
             </div>
@@ -288,9 +320,14 @@ export function SmartContractsPage() {
             <div className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Réclamations traitées</p>
+                <p className="text-sm text-muted-foreground">
+                  Réclamations traitées
+                </p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {deployedContracts.reduce((sum, contract) => sum + contract.totalClaims, 0)}
+                  {deployedContracts.reduce(
+                    (sum, contract) => sum + contract.totalClaims,
+                    0
+                  )}
                 </p>
               </div>
             </div>
@@ -303,7 +340,10 @@ export function SmartContractsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Contrats actifs</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {deployedContracts.filter((c) => c.status === "active").length}
+                  {
+                    deployedContracts.filter((c) => c.status === "active")
+                      .length
+                  }
                 </p>
               </div>
             </div>
@@ -331,7 +371,8 @@ export function SmartContractsPage() {
                   Configuration du contrat + NFT
                 </CardTitle>
                 <CardDescription>
-                  Définissez les paramètres de votre contrat intelligent avec NFT automatique
+                  Définissez les paramètres de votre contrat intelligent avec
+                  NFT automatique
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -340,18 +381,31 @@ export function SmartContractsPage() {
                   <Select
                     value={contractRequirements.insuranceType}
                     onValueChange={(value) =>
-                      setContractRequirements({ ...contractRequirements, insuranceType: value })
+                      setContractRequirements({
+                        ...contractRequirements,
+                        insuranceType: value,
+                      })
                     }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Assurance Sécheresse">Assurance Sécheresse</SelectItem>
-                      <SelectItem value="Protection Inondation">Protection Inondation</SelectItem>
-                      <SelectItem value="Assurance Grêle">Assurance Grêle</SelectItem>
-                      <SelectItem value="Protection Gel">Protection Gel</SelectItem>
-                      <SelectItem value="Assurance Multi-Risques">Assurance Multi-Risques</SelectItem>
+                      <SelectItem value="Assurance Sécheresse">
+                        Assurance Sécheresse
+                      </SelectItem>
+                      <SelectItem value="Protection Inondation">
+                        Protection Inondation
+                      </SelectItem>
+                      <SelectItem value="Assurance Grêle">
+                        Assurance Grêle
+                      </SelectItem>
+                      <SelectItem value="Protection Gel">
+                        Protection Gel
+                      </SelectItem>
+                      <SelectItem value="Assurance Multi-Risques">
+                        Assurance Multi-Risques
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -475,28 +529,40 @@ export function SmartContractsPage() {
                 <div className="aspect-square bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center border-2 border-dashed border-purple-300">
                   <div className="text-center">
                     <ImageIcon className="h-12 w-12 mx-auto text-purple-400 mb-2" />
-                    <p className="text-sm text-purple-600 font-medium">NFT généré automatiquement</p>
-                    <p className="text-xs text-purple-500">Représente votre police d'assurance</p>
+                    <p className="text-sm text-purple-600 font-medium">
+                      NFT généré automatiquement
+                    </p>
+                    <p className="text-xs text-purple-500">
+                      Représente votre police d'assurance
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="font-medium">Nom NFT:</span>
-                    <span className="text-sm">AgriSure Policy #{deployedContractId || "XXXXXX"}</span>
+                    <span className="text-sm">
+                      AgriSure Policy #{deployedContractId || "XXXXXX"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Type:</span>
-                    <span className="text-sm">{contractRequirements.insuranceType}</span>
+                    <span className="text-sm">
+                      {contractRequirements.insuranceType}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Couverture:</span>
-                    <span className="text-sm">{contractRequirements.coverageAmount} HBAR</span>
+                    <span className="text-sm">
+                      {contractRequirements.coverageAmount} HBAR
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Rareté:</span>
                     <Badge variant="outline" className="text-xs">
-                      {contractRequirements.coverageAmount > 1000 ? "Rare" : "Common"}
+                      {contractRequirements.coverageAmount > 1000
+                        ? "Rare"
+                        : "Common"}
                     </Badge>
                   </div>
                 </div>
@@ -507,26 +573,35 @@ export function SmartContractsPage() {
                     <div className="bg-purple-50 p-2 rounded">
                       <span className="font-medium">Insurance Type</span>
                       <br />
-                      <span className="text-purple-600">{contractRequirements.insuranceType}</span>
+                      <span className="text-purple-600">
+                        {contractRequirements.insuranceType}
+                      </span>
                     </div>
                     <div className="bg-pink-50 p-2 rounded">
                       <span className="font-medium">Coverage Ratio</span>
                       <br />
                       <span className="text-pink-600">
-                        {Math.round((contractRequirements.coverageAmount / contractRequirements.premiumAmount) * 100) /
-                          100}
+                        {Math.round(
+                          (contractRequirements.coverageAmount /
+                            contractRequirements.premiumAmount) *
+                            100
+                        ) / 100}
                         :1
                       </span>
                     </div>
                     <div className="bg-blue-50 p-2 rounded">
                       <span className="font-medium">Conditions</span>
                       <br />
-                      <span className="text-blue-600">{contractRequirements.conditions.length}</span>
+                      <span className="text-blue-600">
+                        {contractRequirements.conditions.length}
+                      </span>
                     </div>
                     <div className="bg-green-50 p-2 rounded">
                       <span className="font-medium">Data Sources</span>
                       <br />
-                      <span className="text-green-600">{contractRequirements.triggers.length}</span>
+                      <span className="text-green-600">
+                        {contractRequirements.triggers.length}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -543,12 +618,16 @@ export function SmartContractsPage() {
                     <Star className="h-5 w-5 text-pink-600" />
                     NFT généré avec succès !
                   </div>
-                  <Badge variant="secondary" className="bg-pink-100 text-pink-800">
+                  <Badge
+                    variant="secondary"
+                    className="bg-pink-100 text-pink-800"
+                  >
                     Token ID: {nftData.tokenId}
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Votre police d'assurance est maintenant un NFT unique sur Hedera Hashgraph
+                  Votre police d'assurance est maintenant un NFT unique sur
+                  Hedera Hashgraph
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -558,19 +637,41 @@ export function SmartContractsPage() {
                     <div className="aspect-square bg-gradient-to-br from-purple-200 to-pink-200 rounded-lg flex items-center justify-center">
                       <div className="text-center">
                         <ImageIcon className="h-16 w-16 mx-auto text-purple-600 mb-3" />
-                        <p className="font-bold text-purple-800">{nftData.metadata.name}</p>
-                        <p className="text-sm text-purple-600">#{nftData.tokenId}</p>
+                        <p className="font-bold text-purple-800">
+                          {nftData.metadata.name}
+                        </p>
+                        <p className="text-sm text-purple-600">
+                          #{nftData.tokenId}
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <a href={nftData.openseaUrl} target="_blank" rel="noopener noreferrer">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
+                        <a
+                          href={nftData.openseaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <ExternalLink className="h-4 w-4 mr-2" />
                           OpenSea
                         </a>
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <a href={nftData.hederaExplorerUrl} target="_blank" rel="noopener noreferrer">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
+                        <a
+                          href={nftData.hederaExplorerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <ExternalLink className="h-4 w-4 mr-2" />
                           Explorer
                         </a>
@@ -582,19 +683,29 @@ export function SmartContractsPage() {
                   <div className="space-y-3">
                     <h4 className="font-semibold">Métadonnées NFT</h4>
                     <div className="bg-white p-3 rounded-lg border">
-                      <p className="text-sm text-muted-foreground mb-2">{nftData.metadata.description}</p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {nftData.metadata.description}
+                      </p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        {nftData.metadata.attributes.slice(0, 6).map((attr, index) => (
-                          <div key={index} className="bg-gray-50 p-2 rounded">
-                            <span className="font-medium">{attr.trait_type}</span>
-                            <br />
-                            <span className="text-gray-600">{attr.value}</span>
-                          </div>
-                        ))}
+                        {nftData.metadata.attributes
+                          .slice(0, 6)
+                          .map((attr, index) => (
+                            <div key={index} className="bg-gray-50 p-2 rounded">
+                              <span className="font-medium">
+                                {attr.trait_type}
+                              </span>
+                              <br />
+                              <span className="text-gray-600">
+                                {attr.value}
+                              </span>
+                            </div>
+                          ))}
                       </div>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      <p>Transaction: {nftData.mintTransactionId.slice(0, 20)}...</p>
+                      <p>
+                        Transaction: {nftData.mintTransactionId.slice(0, 20)}...
+                      </p>
                       <p>Contract: {nftData.contractAddress}</p>
                     </div>
                   </div>
@@ -613,18 +724,28 @@ export function SmartContractsPage() {
                     Smart Contract avec NFT généré
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => copyToClipboard(generatedContract)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => copyToClipboard(generatedContract)}
+                    >
                       <Copy className="h-4 w-4 mr-2" />
                       Copier
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleExplainContract} disabled={isExplaining}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExplainContract}
+                      disabled={isExplaining}
+                    >
                       <FileText className="h-4 w-4 mr-2" />
                       {isExplaining ? "Analyse..." : "Expliquer"}
                     </Button>
                   </div>
                 </CardTitle>
                 <CardDescription>
-                  Contrat Solidity avec NFT intégré pour Hedera Hashgraph - ID: {deployedContractId}
+                  Contrat Solidity avec NFT intégré pour Hedera Hashgraph - ID:{" "}
+                  {deployedContractId}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -668,7 +789,8 @@ export function SmartContractsPage() {
                   <Alert>
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription>
-                      Contrat et NFT déployés avec succès ! ID: {deployedContractId} | NFT: #{nftData?.tokenId}
+                      Contrat et NFT déployés avec succès ! ID:{" "}
+                      {deployedContractId} | NFT: #{nftData?.tokenId}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -677,7 +799,8 @@ export function SmartContractsPage() {
                   <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
-                      Erreur lors du déploiement. Vérifiez votre configuration Hedera.
+                      Erreur lors du déploiement. Vérifiez votre configuration
+                      Hedera.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -696,7 +819,9 @@ export function SmartContractsPage() {
               </CardHeader>
               <CardContent>
                 <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap text-sm bg-blue-50 p-4 rounded-lg">{contractExplanation}</div>
+                  <div className="whitespace-pre-wrap text-sm bg-blue-50 p-4 rounded-lg">
+                    {contractExplanation}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -713,7 +838,10 @@ export function SmartContractsPage() {
                     <span className="truncate">{contract.name}</span>
                     <div className="flex gap-2">
                       {contract.nftTokenId && (
-                        <Badge variant="secondary" className="bg-pink-100 text-pink-800">
+                        <Badge
+                          variant="secondary"
+                          className="bg-pink-100 text-pink-800"
+                        >
                           NFT #{contract.nftTokenId}
                         </Badge>
                       )}
@@ -722,8 +850,8 @@ export function SmartContractsPage() {
                           contract.status === "active"
                             ? "default"
                             : contract.status === "pending"
-                              ? "secondary"
-                              : "destructive"
+                            ? "secondary"
+                            : "destructive"
                         }
                       >
                         {contract.status}
@@ -738,7 +866,9 @@ export function SmartContractsPage() {
                     <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center border">
                       <div className="text-center">
                         <ImageIcon className="h-8 w-8 mx-auto text-purple-500 mb-1" />
-                        <p className="text-xs text-purple-600">NFT Policy #{contract.nftTokenId}</p>
+                        <p className="text-xs text-purple-600">
+                          NFT Policy #{contract.nftTokenId}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -756,7 +886,11 @@ export function SmartContractsPage() {
 
                   <div className="text-sm">
                     <p className="text-muted-foreground">Déployé le</p>
-                    <p>{new Date(contract.deployedAt).toLocaleDateString("fr-FR")}</p>
+                    <p>
+                      {new Date(contract.deployedAt).toLocaleDateString(
+                        "fr-FR"
+                      )}
+                    </p>
                   </div>
 
                   <div className="flex gap-2">
@@ -790,16 +924,25 @@ export function SmartContractsPage() {
               {deployedContracts
                 .filter((contract) => contract.nftTokenId)
                 .map((contract) => (
-                  <Card key={contract.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={contract.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardContent className="p-4">
                       <div className="aspect-square bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center mb-3">
                         <div className="text-center">
                           <ImageIcon className="h-12 w-12 mx-auto text-purple-500 mb-2" />
-                          <p className="text-sm font-medium text-purple-700">#{contract.nftTokenId}</p>
+                          <p className="text-sm font-medium text-purple-700">
+                            #{contract.nftTokenId}
+                          </p>
                         </div>
                       </div>
-                      <h4 className="font-semibold text-sm mb-1">{contract.name}</h4>
-                      <p className="text-xs text-muted-foreground mb-3">{contract.address}</p>
+                      <h4 className="font-semibold text-sm mb-1">
+                        {contract.name}
+                      </h4>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        {contract.address}
+                      </p>
                       <div className="flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
                           {contract.balance} HBAR
@@ -829,7 +972,10 @@ export function SmartContractsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Statut du réseau</span>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 text-green-800"
+                  >
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                     Opérationnel
                   </Badge>
@@ -844,11 +990,15 @@ export function SmartContractsPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">NFTs mintés</span>
-                  <span className="text-sm font-medium">{deployedContracts.filter((c) => c.nftTokenId).length}</span>
+                  <span className="text-sm font-medium">
+                    {deployedContracts.filter((c) => c.nftTokenId).length}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Contrats déployés</span>
-                  <span className="text-sm font-medium">{deployedContracts.length}</span>
+                  <span className="text-sm font-medium">
+                    {deployedContracts.length}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -876,11 +1026,16 @@ export function SmartContractsPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Taux de succès</span>
-                  <span className="text-sm font-medium text-green-600">98.3%</span>
+                  <span className="text-sm font-medium text-green-600">
+                    98.3%
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Paiements automatiques</span>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 text-green-800"
+                  >
                     Activé
                   </Badge>
                 </div>
@@ -899,7 +1054,8 @@ export function SmartContractsPage() {
                   {
                     time: "14:45",
                     action: "NFT minté",
-                    details: "AgriSure Policy #163887 - Assurance Multi-Risques",
+                    details:
+                      "AgriSure Policy #163887 - Assurance Multi-Risques",
                     status: "success",
                   },
                   {
@@ -933,24 +1089,33 @@ export function SmartContractsPage() {
                     status: "info",
                   },
                 ].map((log, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
+                  >
                     <div
                       className={`w-2 h-2 rounded-full ${
                         log.status === "success"
                           ? "bg-green-500"
                           : log.status === "warning"
-                            ? "bg-orange-500"
-                            : log.status === "error"
-                              ? "bg-red-500"
-                              : "bg-blue-500"
+                          ? "bg-orange-500"
+                          : log.status === "error"
+                          ? "bg-red-500"
+                          : "bg-blue-500"
                       }`}
                     ></div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-sm">{log.action}</span>
-                        <span className="text-xs text-muted-foreground">{log.time}</span>
+                        <span className="font-medium text-sm">
+                          {log.action}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {log.time}
+                        </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{log.details}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {log.details}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -960,5 +1125,5 @@ export function SmartContractsPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

@@ -1,53 +1,54 @@
 interface ContractRequirements {
-  insuranceType: string
-  coverageAmount: number
-  premiumAmount: number
-  conditions: string[]
-  triggers: string[]
+  insuranceType: string;
+  coverageAmount: number;
+  premiumAmount: number;
+  conditions: string[];
+  triggers: string[];
 }
 
 interface NFTMetadata {
-  name: string
-  description: string
-  image: string
+  name: string;
+  description: string;
+  image: string;
   attributes: Array<{
-    trait_type: string
-    value: string | number
-  }>
+    trait_type: string;
+    value: string | number;
+  }>;
 }
 
 export class AIContractGenerator {
   // Générer un smart contract avec NFT intégré
-  async generateSmartContract(requirements: ContractRequirements): Promise<string> {
+  async generateSmartContract(
+    requirements: ContractRequirements
+  ): Promise<string> {
     try {
-      console.log("🧠 Génération du contrat avec NFT intégré...")
-      const contractTemplate = this.getContractWithNFTTemplate(requirements)
-
+      console.log("🧠 Génération du contrat avec NFT intégré...");
+      const contractTemplate = this.getContractWithNFTTemplate(requirements);
       // Simulation d'un délai de génération pour l'UX
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
-      console.log("✅ Contrat avec NFT généré avec succès")
-      return contractTemplate
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log("✅ Contrat avec NFT généré avec succès");
+      return contractTemplate;
     } catch (error) {
-      console.error("Erreur lors de la génération du contrat:", error)
-      throw error
+      console.error("Erreur lors de la génération du contrat:", error);
+      throw error;
     }
   }
 
   // Générer les métadonnées NFT pour la police d'assurance
-  generateNFTMetadata(requirements: ContractRequirements, contractId: string): NFTMetadata {
-    const riskLevel = this.calculateRiskLevel(requirements)
-    const coverageRatio = requirements.coverageAmount / requirements.premiumAmount
+  generateNFTMetadata(
+    requirements: ContractRequirements,
+    contractId: string
+  ): NFTMetadata {
+    const riskLevel = this.calculateRiskLevel(requirements);
+    const coverageRatio =
+      requirements.coverageAmount / requirements.premiumAmount;
 
     return {
       name: `AgriSure Policy #${contractId}`,
       description: `Police d'assurance agricole ${requirements.insuranceType} avec couverture de ${requirements.coverageAmount} HBAR. Smart contract déployé sur Hedera Hashgraph avec paiements automatiques basés sur l'IoT.`,
       image: this.generateNFTImageURL(requirements, contractId),
       attributes: [
-        {
-          trait_type: "Insurance Type",
-          value: requirements.insuranceType,
-        },
+        { trait_type: "Insurance Type", value: requirements.insuranceType },
         {
           trait_type: "Coverage Amount",
           value: `${requirements.coverageAmount} HBAR`,
@@ -56,57 +57,49 @@ export class AIContractGenerator {
           trait_type: "Premium Amount",
           value: `${requirements.premiumAmount} HBAR`,
         },
-        {
-          trait_type: "Coverage Ratio",
-          value: `${coverageRatio}:1`,
-        },
-        {
-          trait_type: "Risk Level",
-          value: riskLevel,
-        },
+        { trait_type: "Coverage Ratio", value: `${coverageRatio}:1` },
+        { trait_type: "Risk Level", value: riskLevel },
         {
           trait_type: "Conditions Count",
           value: requirements.conditions.length,
         },
-        {
-          trait_type: "Data Sources",
-          value: requirements.triggers.length,
-        },
-        {
-          trait_type: "Blockchain",
-          value: "Hedera Hashgraph",
-        },
+        { trait_type: "Data Sources", value: requirements.triggers.length },
+        { trait_type: "Blockchain", value: "Hedera Hashgraph" },
         {
           trait_type: "Contract Standard",
           value: "HTS (Hedera Token Service)",
         },
-        {
-          trait_type: "Automation",
-          value: "IoT + AI Powered",
-        },
+        { trait_type: "Automation", value: "IoT + AI Powered" },
       ],
-    }
+    };
   }
 
   // Calculer le niveau de risque basé sur les paramètres
   private calculateRiskLevel(requirements: ContractRequirements): string {
-    const coverageRatio = requirements.coverageAmount / requirements.premiumAmount
-    const conditionsCount = requirements.conditions.length
+    const coverageRatio =
+      requirements.coverageAmount / requirements.premiumAmount;
+    const conditionsCount = requirements.conditions.length;
 
-    if (coverageRatio > 50 || conditionsCount < 2) return "High Risk"
-    if (coverageRatio > 20 || conditionsCount < 4) return "Medium Risk"
-    return "Low Risk"
+    if (coverageRatio > 50 || conditionsCount < 2) return "High Risk";
+    if (coverageRatio > 20 || conditionsCount < 4) return "Medium Risk";
+    return "Low Risk";
   }
 
   // Générer l'URL de l'image NFT
-  private generateNFTImageURL(requirements: ContractRequirements, contractId: string): string {
-    // Pour la démo, on utilise une URL générée dynamiquement
-    const insuranceTypeSlug = requirements.insuranceType.toLowerCase().replace(/\s+/g, "-")
-    return `https://agrisure-nft.vercel.app/api/generate-nft/${contractId}?type=${insuranceTypeSlug}&coverage=${requirements.coverageAmount}`
+  private generateNFTImageURL(
+    requirements: ContractRequirements,
+    contractId: string
+  ): string {
+    const insuranceTypeSlug = requirements.insuranceType
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+    return `https://agrisure-nft.vercel.app/api/generate-nft/${contractId}?type=${insuranceTypeSlug}&coverage=${requirements.coverageAmount}`;
   }
 
   // Template de smart contract avec NFT intégré
-  private getContractWithNFTTemplate(requirements: ContractRequirements): string {
+  private getContractWithNFTTemplate(
+    requirements: ContractRequirements
+  ): string {
     return `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -129,8 +122,12 @@ contract AgriSureInsuranceNFT is ERC721, ERC721URIStorage, Ownable {
     
     Counters.Counter private _tokenIdCounter;
     
-    uint256 public constant COVERAGE_AMOUNT = ${requirements.coverageAmount} * 1e18;
-    uint256 public constant PREMIUM_AMOUNT = ${requirements.premiumAmount} * 1e18;
+    uint256 public constant COVERAGE_AMOUNT = ${
+      requirements.coverageAmount
+    } * 1e18;
+    uint256 public constant PREMIUM_AMOUNT = ${
+      requirements.premiumAmount
+    } * 1e18;
     
     struct InsurancePolicy {
         string farmerId;
@@ -467,13 +464,12 @@ contract AgriSureInsuranceNFT is ERC721, ERC721URIStorage, Ownable {
     function getContractBalance() public view returns (uint256) {
         return address(this).balance;
     }
-}`
+}`;
   }
 
   // Analyser et optimiser un contrat existant
   async optimizeContract(contractCode: string): Promise<string> {
     try {
-      // Pour la démo, on retourne le contrat avec des commentaires d'optimisation
       return `${contractCode}
 
 /*
@@ -497,10 +493,10 @@ COMPATIBILITÉ HEDERA:
 - Compatible avec Hedera Token Service (HTS)
 - Optimisé pour les frais Hedera
 - Intégration avec les wallets Hedera
-*/`
+*/`;
     } catch (error) {
-      console.error("Erreur lors de l'optimisation du contrat:", error)
-      throw error
+      console.error("Erreur lors de l'optimisation du contrat:", error);
+      throw error;
     }
   }
 
@@ -539,7 +535,7 @@ Les paiements d'assurance sont envoyés automatiquement au propriétaire actuel 
 ## 🎨 **Génération d'image NFT**
 Chaque NFT a une image unique générée selon :
 - **Type d'assurance** → Couleur et icônes
-- **Niveau de risque** �� Bordures et effets
+- **Niveau de risque** → Bordures et effets
 - **Couverture** → Taille et éléments visuels
 - **ID du contrat** → Pattern unique
 
@@ -576,8 +572,8 @@ Les NFTs peuvent être :
 - **Métadonnées immuables** sur IPFS
 - **Audit trail** complet des transferts
 
-Cette innovation transforme l'assurance agricole traditionnelle en actifs numériques négociables, créant un nouveau marché financier décentralisé pour l'agriculture ! 🚀`
+Cette innovation transforme l'assurance agricole traditionnelle en actifs numériques négociables, créant un nouveau marché financier décentralisé pour l'agriculture ! 🚀`;
   }
 }
 
-export const aiContractGenerator = new AIContractGenerator()
+export const aiContractGenerator = new AIContractGenerator();

@@ -8,6 +8,7 @@ import {
   Hbar,
   FileCreateTransaction,
   type ContractId,
+  ContractFunctionResult,
 } from "@hashgraph/sdk"
 
 // Configuration Hedera
@@ -94,7 +95,7 @@ export class HederaService {
   }
 
   // Vérifier le statut d'un contrat
-  async getContractInfo(contractId: ContractId, functionName: string): Promise<any> {
+  async getContractInfo(contractId: ContractId, functionName: string): Promise<ContractFunctionResult> {
     try {
       const contractCallQuery = new ContractCallQuery()
         .setContractId(contractId)

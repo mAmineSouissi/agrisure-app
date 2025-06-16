@@ -5,7 +5,7 @@ export interface SystemEvent {
   title: string
   description: string
   status?: "completed" | "in-progress" | "failed"
-  details?: any
+  details?: string
   user_id?: string
 }
 
@@ -42,7 +42,7 @@ export class EventTracker {
     type: string
     status: "success" | "failed" | "running"
     executionTime?: number
-    dataProcessed?: any
+    dataProcessed?: number
     description?: string
   }) {
     try {

@@ -11,7 +11,7 @@ import { ProjectOverviewPage } from "../pages/project-overview-page"
 import { HistoryPage } from "../pages/history-page"
 
 export function MainLayout() {
-  const [currentPage, setCurrentPage] = useState("project-overview") // Commencer par la vue d'ensemble
+  const [currentPage, setCurrentPage] = useState("dashboard")
 
   const renderPage = () => {
     switch (currentPage) {
@@ -24,7 +24,7 @@ export function MainLayout() {
       case "chatbot":
         return <ChatbotPage />
       case "history":
-        return <HistoryPage onNavigate={setCurrentPage} />
+        return <HistoryPage />
       case "project-overview":
         return <ProjectOverviewPage />
       default:

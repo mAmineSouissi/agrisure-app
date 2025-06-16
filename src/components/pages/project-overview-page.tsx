@@ -1,12 +1,18 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 import {
   TimerIcon as Timeline,
   Database,
@@ -22,89 +28,79 @@ import {
   Server,
   Workflow,
   Shield,
-} from "lucide-react"
-import { database } from "@/lib/database"
-import { useAuth } from "@/components/auth/auth-provider"
-import { supabase } from "@/lib/supabase"
+} from "lucide-react";
+import { database } from "@/lib/database";
+import { useAuth } from "@/components/auth/auth-provider";
+import { supabase } from "@/lib/supabase";
 
 interface ProjectEvent {
-  id: string
-  timestamp: string
-  type: "database" | "contract" | "workflow" | "integration" | "deployment"
-  title: string
-  description: string
-  status: "completed" | "in-progress" | "failed"
-  details?: any
+  id: string;
+  timestamp: string;
+  type: "database" | "contract" | "workflow" | "integration" | "deployment";
+  title: string;
+  description: string;
+  status: "completed" | "in-progress" | "failed";
+  details?: Record<string, unknown>;
 }
 
 interface ProjectMetrics {
-  totalContracts: number
-  totalWorkflows: number
-  databaseTables: number
-  integrations: number
-  deployments: number
-  successRate: number
+  totalContracts: number;
+  totalWorkflows: number;
+  databaseTables: number;
+  integrations: number;
+  deployments: number;
+  successRate: number;
   realTimeData: {
-    users: number
-    farms: number
-    climateEvents: number
-    payments: number
-    agents: number
-    sensorReadings: number
-  }
+    users: number;
+    farms: number;
+    climateEvents: number;
+    payments: number;
+    agents: number;
+    sensorReadings: number;
+  };
 }
 
 interface SystemStatus {
-  database: "connected" | "disconnected" | "error"
-  hedera: "connected" | "disconnected" | "error"
-  n8n: "connected" | "disconnected" | "error"
-  api: "operational" | "degraded" | "down"
+  database: "connected" | "disconnected" | "error";
+  hedera: "connected" | "disconnected" | "error";
+  n8n: "connected" | "disconnected" | "error";
+  api: "operational" | "degraded" | "down";
 }
 
-export function ProjectOverviewPage() {
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState("timeline")
-  const [projectEvents, setProjectEvents] = useState<ProjectEvent[]>([])
-  const [metrics, setMetrics] = useState<ProjectMetrics | null>(null)
-  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
+export function ProjectOverviewPage(): JSX.Element {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("timeline");
+  const [projectEvents, setProjectEvents] = useState<ProjectEvent[]>([]);
+  const [metrics, setMetrics] = useState<ProjectMetrics | null>(null);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
-    loadRealProjectData()
-    // Actualiser toutes les 30 secondes
-    const interval = setInterval(loadRealProjectData, 30000)
-    return () => clearInterval(interval)
-  }, [user])
+    loadRealProjectData();
+    const interval = setInterval(loadRealProjectData, 30000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
-  const loadRealProjectData = async () => {
+  const loadRealProjectData = async (): Promise<void> => {
     try {
-      setLoading(true)
-
-      // 1. Tester la connectivité des systèmes
-      const status = await checkSystemStatus()
-      setSystemStatus(status)
-
-      // 2. Récupérer les vraies données de la base
-      const realData = await getRealDatabaseMetrics()
-
-      // 3. Générer les événements basés sur les vraies données
-      const events = await generateRealEvents(realData)
-
-      // 4. Calculer les métriques réelles
-      const realMetrics = await calculateRealMetrics(realData, status)
-
-      setProjectEvents(events)
-      setMetrics(realMetrics)
-      setLastUpdate(new Date())
+      setLoading(true);
+      const status = await checkSystemStatus();
+      setSystemStatus(status);
+      const realData = await getRealDatabaseMetrics();
+      const events = await generateRealEvents(realData);
+      const realMetrics = await calculateRealMetrics(realData, status);
+      setProjectEvents(events);
+      setMetrics(realMetrics);
+      setLastUpdate(new Date());
     } catch (error) {
-      console.error("Erreur lors du chargement des données:", error)
-      // En cas d'erreur, utiliser des données de fallback
-      loadFallbackData()
+      console.error("Erreur lors du chargement des données:", error);
+      loadFallbackData();
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const checkSystemStatus = async (): Promise<SystemStatus> => {
     const status: SystemStatus = {
@@ -112,84 +108,78 @@ export function ProjectOverviewPage() {
       hedera: "disconnected",
       n8n: "disconnected",
       api: "operational",
+    };
+
+    try {
+      await database.getAIAgents();
+      status.database = "connected";
+    } catch {
+      status.database = "error";
     }
 
     try {
-      // Test base de données
-      await database.getAIAgents()
-      status.database = "connected"
+      const response = await fetch("/api/hedera/status");
+      status.hedera = response.ok ? "connected" : "error";
     } catch {
-      status.database = "error"
+      status.hedera = "error";
     }
 
     try {
-      // Test API Hedera
-      const response = await fetch("/api/hedera/status")
-      status.hedera = response.ok ? "connected" : "error"
+      const response = await fetch("/api/n8n/status");
+      status.n8n = response.ok ? "connected" : "disconnected";
     } catch {
-      status.hedera = "error"
+      status.n8n = "disconnected";
     }
 
-    try {
-      // Test n8n
-      const response = await fetch("/api/n8n/status")
-      status.n8n = response.ok ? "connected" : "disconnected"
-    } catch {
-      status.n8n = "disconnected"
-    }
+    return status;
+  };
 
-    return status
-  }
-
-  const getRealDatabaseMetrics = async () => {
-    if (!user) return null
+  const getRealDatabaseMetrics = async (): Promise<
+    ProjectMetrics["realTimeData"] | null
+  > => {
+    if (!user) return null;
 
     try {
       const [farms, payments, agents, climateEvents] = await Promise.all([
         database.getFarmsByUser(user.id),
         database.getPaymentsByUser(user.id),
         database.getAIAgents(),
-        // Récupérer les événements climatiques pour toutes les fermes
-        database
-          .getFarmsByUser(user.id)
-          .then(async (farms) => {
-            if (farms.length === 0) return []
-            const events = await database.getClimateEvents(farms[0].id)
-            return events
-          }),
-      ])
+        database.getFarmsByUser(user.id).then(async (farms) => {
+          if (farms.length === 0) return [];
+          const events = await database.getClimateEvents(farms[0].id);
+          return events;
+        }),
+      ]);
 
-      // Compter les lectures de capteurs
-      let sensorReadings = 0
+      let sensorReadings = 0;
       if (farms.length > 0) {
-        const sensors = await database.getLatestSensorData(farms[0].id)
-        sensorReadings = sensors?.length || 0
+        const sensors = await database.getLatestSensorData(farms[0].id);
+        sensorReadings = sensors?.length || 0;
       }
 
       return {
-        users: 1, // L'utilisateur connecté
+        users: 1,
         farms: farms.length,
         climateEvents: Array.isArray(climateEvents) ? climateEvents.length : 0,
         payments: payments.length,
         agents: agents.length,
         sensorReadings,
-      }
+      };
     } catch (error) {
-      console.error("Erreur récupération données:", error)
-      return null
+      console.error("Erreur récupération données:", error);
+      return null;
     }
-  }
+  };
 
   const getRecentContractEvents = async (): Promise<ProjectEvent[]> => {
     try {
-      // Récupérer les vrais contrats depuis la base de données
       const { data: contracts, error } = await supabase
         .from("smart_contracts")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(5)
+        .limit(5);
 
-      if (error) throw error
+      if (error) throw error;
 
       return (
         contracts?.map((contract) => ({
@@ -198,7 +188,10 @@ export function ProjectOverviewPage() {
           type: "contract" as const,
           title: `Smart Contract ${contract.contract_type}`,
           description: `Contrat déployé sur ${contract.blockchain_network}`,
-          status: contract.status === "deployed" ? ("completed" as const) : ("in-progress" as const),
+          status:
+            contract.status === "deployed"
+              ? ("completed" as const)
+              : ("in-progress" as const),
           details: {
             contractId: contract.contract_address || contract.id,
             network: contract.blockchain_network,
@@ -206,23 +199,22 @@ export function ProjectOverviewPage() {
             type: contract.contract_type,
           },
         })) || []
-      )
+      );
     } catch (error) {
-      console.error("Erreur récupération contrats:", error)
-      return []
+      console.error("Erreur récupération contrats:", error);
+      return [];
     }
-  }
+  };
 
   const getRecentWorkflowEvents = async (): Promise<ProjectEvent[]> => {
     try {
-      // Récupérer les vrais workflows depuis la base de données
       const { data: workflows, error } = await supabase
         .from("n8n_workflow_executions")
         .select("*")
         .order("executed_at", { ascending: false })
-        .limit(5)
+        .limit(5);
 
-      if (error) throw error
+      if (error) throw error;
 
       return (
         workflows?.map((workflow) => ({
@@ -235,8 +227,8 @@ export function ProjectOverviewPage() {
             workflow.status === "success"
               ? ("completed" as const)
               : workflow.status === "failed"
-                ? ("failed" as const)
-                : ("in-progress" as const),
+              ? ("failed" as const)
+              : ("in-progress" as const),
           details: {
             workflowType: workflow.workflow_type,
             duration: workflow.execution_time,
@@ -244,36 +236,43 @@ export function ProjectOverviewPage() {
             mode: workflow.mode || "real",
           },
         })) || []
-      )
+      );
     } catch (error) {
-      console.error("Erreur récupération workflows:", error)
-      return []
+      console.error("Erreur récupération workflows:", error);
+      return [];
     }
-  }
+  };
 
-  const generateRealEvents = async (realData: any): Promise<ProjectEvent[]> => {
-    const events: ProjectEvent[] = []
+  const generateRealEvents = async (
+    realData: unknown
+  ): Promise<ProjectEvent[]> => {
+    const events: ProjectEvent[] = [];
 
     try {
-      // 1. Événements de base de données réels
-      if (systemStatus?.database === "connected" && realData) {
+      if (
+        systemStatus?.database === "connected" &&
+        realData &&
+        typeof realData === "object" &&
+        realData !== null
+      ) {
+        const rd = realData as ProjectMetrics["realTimeData"];
         events.push({
           id: "db-connection",
           timestamp: new Date(Date.now() - 3600000).toISOString(),
           type: "database",
           title: "Base de données Supabase connectée",
-          description: `${realData.farms} fermes, ${realData.payments} paiements actifs`,
+          description: `${rd.farms} fermes, ${rd.payments} paiements actifs`,
           status: "completed",
-          details: realData,
-        })
+          details: rd,
+        });
       }
 
-      // 2. Événements des paiements récents
       if (user) {
-        const recentPayments = await database.getPaymentsByUser(user.id)
+        const recentPayments = await database.getPaymentsByUser(user.id);
         const todayPayments = recentPayments.filter(
-          (p) => new Date(p.created_at).toDateString() === new Date().toDateString(),
-        )
+          (p) =>
+            new Date(p.created_at).toDateString() === new Date().toDateString()
+        );
 
         if (todayPayments.length > 0) {
           events.push({
@@ -288,17 +287,22 @@ export function ProjectOverviewPage() {
               totalAmount: todayPayments.reduce((sum, p) => sum + p.amount, 0),
               currency: todayPayments[0].currency,
             },
-          })
+          });
         }
       }
 
-      // 3. Événements des capteurs récents
-      if (realData?.farms > 0 && user) {
-        const farms = await database.getFarmsByUser(user.id)
+      if (
+        realData &&
+        typeof realData === "object" &&
+        realData !== null &&
+        (realData as ProjectMetrics["realTimeData"]).farms > 0 &&
+        user
+      ) {
+        const farms = await database.getFarmsByUser(user.id);
         if (farms.length > 0) {
-          const recentSensors = await database.getLatestSensorData(farms[0].id)
+          const recentSensors = await database.getLatestSensorData(farms[0].id);
           if (recentSensors && recentSensors.length > 0) {
-            const latestSensor = recentSensors[0]
+            const latestSensor = recentSensors[0];
             events.push({
               id: "sensor-data",
               timestamp: latestSensor.recorded_at,
@@ -313,26 +317,29 @@ export function ProjectOverviewPage() {
                 ph: latestSensor.ph_level,
                 salinity: latestSensor.salinity,
               },
-            })
+            });
           }
         }
       }
 
-      // 4. Événements des contrats réels
-      const contractEvents = await getRecentContractEvents()
-      events.push(...contractEvents)
+      const contractEvents = await getRecentContractEvents();
+      events.push(...contractEvents);
 
-      // 5. Événements des workflows réels
-      const workflowEvents = await getRecentWorkflowEvents()
-      events.push(...workflowEvents)
+      const workflowEvents = await getRecentWorkflowEvents();
+      events.push(...workflowEvents);
 
-      // 6. Événements des prédictions IA
-      if (realData?.farms > 0 && user) {
-        const farms = await database.getFarmsByUser(user.id)
+      if (
+        realData &&
+        typeof realData === "object" &&
+        realData !== null &&
+        (realData as ProjectMetrics["realTimeData"]).farms > 0 &&
+        user
+      ) {
+        const farms = await database.getFarmsByUser(user.id);
         if (farms.length > 0) {
-          const predictions = await database.getRiskPredictions(farms[0].id)
+          const predictions = await database.getRiskPredictions(farms[0].id);
           if (predictions && predictions.length > 0) {
-            const latestPrediction = predictions[0]
+            const latestPrediction = predictions[0];
             events.push({
               id: "ai-prediction",
               timestamp: latestPrediction.created_at,
@@ -346,38 +353,38 @@ export function ProjectOverviewPage() {
                 severity: latestPrediction.severity,
                 validUntil: latestPrediction.valid_until,
               },
-            })
+            });
           }
         }
       }
 
-      return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      return events.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
     } catch (error) {
-      console.error("Erreur génération événements:", error)
-      return events
+      console.error("Erreur génération événements:", error);
+      return events;
     }
-  }
+  };
 
-  const calculateRealMetrics = async (realData: any, status: SystemStatus): Promise<ProjectMetrics> => {
+  const calculateRealMetrics = async (
+    realData: unknown,
+    status: SystemStatus
+  ): Promise<ProjectMetrics> => {
     try {
-      // Compter les vrais contrats
-      const { data: contracts } = await supabase.from("smart_contracts").select("id").eq("status", "deployed")
-
-      // Compter les vrais workflows
+      const { data: contracts } = await supabase
+        .from("smart_contracts")
+        .select("id")
+        .eq("status", "deployed");
       const { data: workflows } = await supabase
         .from("n8n_workflow_executions")
         .select("id")
-        .gte("executed_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .gte(
+          "executed_at",
+          new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+        );
 
-      // Remplacer cette partie :
-      // Compter les tables de la base
-      // const { data: tables } = await supabase
-      //   .from("information_schema.tables")
-      //   .select("table_name")
-      //   .eq("table_schema", "public")
-
-      // Par cette approche :
-      // Compter les tables en utilisant une liste statique des tables connues
       const knownTables = [
         "profiles",
         "farms",
@@ -390,24 +397,28 @@ export function ProjectOverviewPage() {
         "smart_contracts",
         "n8n_workflow_executions",
         "system_events",
-      ]
+      ];
 
-      // Vérifier quelles tables existent réellement
-      let existingTablesCount = 0
+      let existingTablesCount = 0;
       for (const tableName of knownTables) {
         try {
-          const { error } = await supabase.from(tableName).select("id").limit(1)
+          const { error } = await supabase
+            .from(tableName)
+            .select("id")
+            .limit(1);
           if (!error) {
-            existingTablesCount++
+            existingTablesCount++;
           }
         } catch {
           // Table n'existe pas, continuer
         }
       }
 
-      const connectedSystems = Object.values(status).filter((s) => s === "connected").length
-      const totalSystems = Object.keys(status).length
-      const successRate = Math.round((connectedSystems / totalSystems) * 100)
+      const connectedSystems = Object.values(status).filter(
+        (s) => s === "connected"
+      ).length;
+      const totalSystems = Object.keys(status).length;
+      const successRate = Math.round((connectedSystems / totalSystems) * 100);
 
       return {
         totalContracts: contracts?.length || 0,
@@ -416,7 +427,7 @@ export function ProjectOverviewPage() {
         integrations: connectedSystems,
         deployments: status.api === "operational" ? 1 : 0,
         successRate,
-        realTimeData: realData || {
+        realTimeData: (realData as ProjectMetrics["realTimeData"]) || {
           users: 0,
           farms: 0,
           climateEvents: 0,
@@ -424,13 +435,14 @@ export function ProjectOverviewPage() {
           agents: 0,
           sensorReadings: 0,
         },
-      }
+      };
     } catch (error) {
-      console.error("Erreur calcul métriques:", error)
-      // Fallback vers les données par défaut
-      const connectedSystems = Object.values(status).filter((s) => s === "connected").length
-      const totalSystems = Object.keys(status).length
-      const successRate = Math.round((connectedSystems / totalSystems) * 100)
+      console.error("Erreur calcul métriques:", error);
+      const connectedSystems = Object.values(status).filter(
+        (s) => s === "connected"
+      ).length;
+      const totalSystems = Object.keys(status).length;
+      const successRate = Math.round((connectedSystems / totalSystems) * 100);
 
       return {
         totalContracts: 1,
@@ -439,7 +451,7 @@ export function ProjectOverviewPage() {
         integrations: connectedSystems,
         deployments: status.api === "operational" ? 1 : 0,
         successRate,
-        realTimeData: realData || {
+        realTimeData: (realData as ProjectMetrics["realTimeData"]) || {
           users: 0,
           farms: 0,
           climateEvents: 0,
@@ -447,12 +459,11 @@ export function ProjectOverviewPage() {
           agents: 0,
           sensorReadings: 0,
         },
-      }
+      };
     }
-  }
+  };
 
-  const loadFallbackData = () => {
-    // Données de fallback en cas d'erreur
+  const loadFallbackData = (): void => {
     setMetrics({
       totalContracts: 1,
       totalWorkflows: 5,
@@ -468,7 +479,7 @@ export function ProjectOverviewPage() {
         agents: 0,
         sensorReadings: 0,
       },
-    })
+    });
 
     setProjectEvents([
       {
@@ -480,57 +491,57 @@ export function ProjectOverviewPage() {
         status: "in-progress",
         details: { mode: "offline" },
       },
-    ])
-  }
+    ]);
+  };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string): JSX.Element => {
     switch (status) {
       case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
       case "in-progress":
-        return <Clock className="h-4 w-4 text-blue-600" />
+        return <Clock className="h-4 w-4 text-blue-600" />;
       case "failed":
-        return <AlertTriangle className="h-4 w-4 text-red-600" />
+        return <AlertTriangle className="h-4 w-4 text-red-600" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-600" />
+        return <Clock className="h-4 w-4 text-gray-600" />;
     }
-  }
+  };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (type: string): JSX.Element => {
     switch (type) {
       case "database":
-        return <Database className="h-5 w-5 text-blue-600" />
+        return <Database className="h-5 w-5 text-blue-600" />;
       case "contract":
-        return <Code className="h-5 w-5 text-purple-600" />
+        return <Code className="h-5 w-5 text-purple-600" />;
       case "workflow":
-        return <Workflow className="h-5 w-5 text-green-600" />
+        return <Workflow className="h-5 w-5 text-green-600" />;
       case "integration":
-        return <Zap className="h-5 w-5 text-orange-600" />
+        return <Zap className="h-5 w-5 text-orange-600" />;
       case "deployment":
-        return <Rocket className="h-5 w-5 text-red-600" />
+        return <Rocket className="h-5 w-5 text-red-600" />;
       default:
-        return <Settings className="h-5 w-5 text-gray-600" />
+        return <Settings className="h-5 w-5 text-gray-600" />;
     }
-  }
+  };
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type: string): string => {
     switch (type) {
       case "database":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "contract":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       case "workflow":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "integration":
-        return "bg-orange-100 text-orange-800"
+        return "bg-orange-100 text-orange-800";
       case "deployment":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
-  const getSystemStatusBadge = (status: string) => {
+  const getSystemStatusBadge = (status: string): JSX.Element => {
     switch (status) {
       case "connected":
         return (
@@ -538,123 +549,141 @@ export function ProjectOverviewPage() {
             <CheckCircle className="h-3 w-3 mr-1" />
             Connecté
           </Badge>
-        )
+        );
       case "disconnected":
         return (
           <Badge className="bg-orange-100 text-orange-800">
             <Clock className="h-3 w-3 mr-1" />
             Déconnecté
           </Badge>
-        )
+        );
       case "error":
         return (
           <Badge className="bg-red-100 text-red-800">
             <AlertTriangle className="h-3 w-3 mr-1" />
             Erreur
           </Badge>
-        )
+        );
       case "operational":
         return (
           <Badge className="bg-green-100 text-green-800">
             <CheckCircle className="h-3 w-3 mr-1" />
             Opérationnel
           </Badge>
-        )
+        );
       case "degraded":
         return (
           <Badge className="bg-orange-100 text-orange-800">
             <Clock className="h-3 w-3 mr-1" />
             Dégradé
           </Badge>
-        )
+        );
       case "down":
         return (
           <Badge className="bg-red-100 text-red-800">
             <AlertTriangle className="h-3 w-3 mr-1" />
             Hors ligne
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="secondary">Inconnu</Badge>
+        return <Badge variant="secondary">Inconnu</Badge>;
     }
-  }
+  };
 
-  const formatEventDetails = (details: any, type: string) => {
-    if (!details) return null
+  const formatEventDetails = (
+    details: Record<string, unknown>,
+    type: string
+  ): JSX.Element | null => {
+    if (!details) return null;
 
     switch (type) {
       case "database":
         return (
           <div className="space-y-1">
             <div>
-              <span className="font-medium">Fermes:</span> {details.farms || 0}
+              <span className="font-medium">Fermes:</span>{" "}
+              {(details.farms as number) || 0}
             </div>
             <div>
-              <span className="font-medium">Paiements:</span> {details.payments || 0}
+              <span className="font-medium">Paiements:</span>{" "}
+              {(details.payments as number) || 0}
             </div>
             <div>
-              <span className="font-medium">Agents IA:</span> {details.agents || 0}
+              <span className="font-medium">Agents IA:</span>{" "}
+              {(details.agents as number) || 0}
             </div>
             <div>
-              <span className="font-medium">Événements climatiques:</span> {details.climateEvents || 0}
+              <span className="font-medium">Événements climatiques:</span>{" "}
+              {(details.climateEvents as number) || 0}
             </div>
             <div>
-              <span className="font-medium">Lectures capteurs:</span> {details.sensorReadings || 0}
+              <span className="font-medium">Lectures capteurs:</span>{" "}
+              {(details.sensorReadings as number) || 0}
             </div>
           </div>
-        )
+        );
 
       case "contract":
         return (
           <div className="space-y-1">
             <div>
-              <span className="font-medium">ID Contrat:</span> {details.contractId}
+              <span className="font-medium">ID Contrat:</span>{" "}
+              {details.contractId as string}
             </div>
             <div>
-              <span className="font-medium">Réseau:</span> {details.network}
+              <span className="font-medium">Réseau:</span>{" "}
+              {details.network as string}
             </div>
             <div>
-              <span className="font-medium">Gas utilisé:</span> {details.gasUsed}
+              <span className="font-medium">Gas utilisé:</span>{" "}
+              {details.gasUsed as string}
             </div>
           </div>
-        )
+        );
 
       case "workflow":
         return (
           <div className="space-y-1">
             <div>
-              <span className="font-medium">Type:</span> {details.workflowType}
+              <span className="font-medium">Type:</span>{" "}
+              {details.workflowType as string}
             </div>
             <div>
-              <span className="font-medium">Mode:</span> {details.mode === "real" ? "Temps réel" : "Simulation"}
+              <span className="font-medium">Mode:</span>{" "}
+              {details.mode === "real" ? "Temps réel" : "Simulation"}
             </div>
           </div>
-        )
+        );
 
       case "integration":
         return (
           <div className="space-y-1">
             <div>
-              <span className="font-medium">Nombre d'agents:</span> {details.agentCount || "N/A"}
+              <span className="font-medium">Nombre d'agents:</span>{" "}
+              {(details.agentCount as number) || "N/A"}
             </div>
             <div>
-              <span className="font-medium">Mode:</span> {details.mode === "offline" ? "Hors ligne" : "En ligne"}
+              <span className="font-medium">Mode:</span>{" "}
+              {details.mode === "offline" ? "Hors ligne" : "En ligne"}
             </div>
           </div>
-        )
+        );
 
       default:
         return (
           <div className="space-y-1">
             {Object.entries(details).map(([key, value]) => (
               <div key={key}>
-                <span className="font-medium capitalize">{key.replace(/([A-Z])/g, " $1")}:</span> {String(value)}
+                <span className="font-medium capitalize">
+                  {key.replace(/([A-Z])/g, " $1")}:
+                </span>{" "}
+                {String(value)}
               </div>
             ))}
           </div>
-        )
+        );
     }
-  }
+  };
 
   if (loading && !metrics) {
     return (
@@ -664,7 +693,7 @@ export function ProjectOverviewPage() {
           <p>Chargement des données en temps réel...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -672,13 +701,22 @@ export function ProjectOverviewPage() {
       {/* En-tête avec actualisation */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-green-800">Vue d'ensemble du Projet AgriSure</h1>
+          <h1 className="text-3xl font-bold text-green-800">
+            Vue d'ensemble du Projet AgriSure
+          </h1>
           <p className="text-muted-foreground">
-            Données en temps réel • Dernière mise à jour: {lastUpdate.toLocaleTimeString("fr-FR")}
+            Données en temps réel • Dernière mise à jour:{" "}
+            {lastUpdate.toLocaleTimeString("fr-FR")}
           </p>
         </div>
-        <Button onClick={loadRealProjectData} disabled={loading} variant="outline">
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+        <Button
+          onClick={loadRealProjectData}
+          disabled={loading}
+          variant="outline"
+        >
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+          />
           Actualiser
         </Button>
       </div>
@@ -691,7 +729,9 @@ export function ProjectOverviewPage() {
               <Database className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Tables DB</p>
-                <p className="text-2xl font-bold text-blue-600">{metrics?.databaseTables || 0}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {metrics?.databaseTables || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -702,7 +742,9 @@ export function ProjectOverviewPage() {
               <Code className="h-5 w-5 text-purple-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Contrats</p>
-                <p className="text-2xl font-bold text-purple-600">{metrics?.totalContracts || 0}</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {metrics?.totalContracts || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -713,7 +755,9 @@ export function ProjectOverviewPage() {
               <Workflow className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Workflows</p>
-                <p className="text-2xl font-bold text-green-600">{metrics?.totalWorkflows || 0}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {metrics?.totalWorkflows || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -724,7 +768,9 @@ export function ProjectOverviewPage() {
               <Zap className="h-5 w-5 text-orange-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Intégrations</p>
-                <p className="text-2xl font-bold text-orange-600">{metrics?.integrations || 0}</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {metrics?.integrations || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -735,7 +781,9 @@ export function ProjectOverviewPage() {
               <Rocket className="h-5 w-5 text-red-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Déploiements</p>
-                <p className="text-2xl font-bold text-red-600">{metrics?.deployments || 0}</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {metrics?.deployments || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -746,7 +794,9 @@ export function ProjectOverviewPage() {
               <BarChart3 className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Succès</p>
-                <p className="text-2xl font-bold text-green-600">{metrics?.successRate || 0}%</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {metrics?.successRate || 0}%
+                </p>
               </div>
             </div>
           </CardContent>
@@ -764,27 +814,39 @@ export function ProjectOverviewPage() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{metrics?.realTimeData.users || 0}</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {metrics?.realTimeData.users || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Utilisateurs</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{metrics?.realTimeData.farms || 0}</p>
+              <p className="text-2xl font-bold text-green-600">
+                {metrics?.realTimeData.farms || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Fermes</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-orange-600">{metrics?.realTimeData.climateEvents || 0}</p>
+              <p className="text-2xl font-bold text-orange-600">
+                {metrics?.realTimeData.climateEvents || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Événements</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-purple-600">{metrics?.realTimeData.payments || 0}</p>
+              <p className="text-2xl font-bold text-purple-600">
+                {metrics?.realTimeData.payments || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Paiements</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-red-600">{metrics?.realTimeData.agents || 0}</p>
+              <p className="text-2xl font-bold text-red-600">
+                {metrics?.realTimeData.agents || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Agents IA</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-yellow-600">{metrics?.realTimeData.sensorReadings || 0}</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {metrics?.realTimeData.sensorReadings || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Capteurs</p>
             </div>
           </div>
@@ -835,35 +897,49 @@ export function ProjectOverviewPage() {
                 <Timeline className="h-5 w-5 text-blue-600" />
                 Événements en Temps Réel
               </CardTitle>
-              <CardDescription>Activité récente du système AgriSure</CardDescription>
+              <CardDescription>
+                Activité récente du système AgriSure
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {projectEvents.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    Aucun événement récent. Utilisez l'application pour générer de l'activité.
+                    Aucun événement récent. Utilisez l'application pour générer
+                    de l'activité.
                   </p>
                 ) : (
                   projectEvents.map((event, index) => (
-                    <div key={event.id} className="flex gap-4 p-4 rounded-lg border">
+                    <div
+                      key={event.id}
+                      className="flex gap-4 p-4 rounded-lg border"
+                    >
                       <div className="flex flex-col items-center">
                         {getTypeIcon(event.type)}
-                        {index < projectEvents.length - 1 && <div className="w-px h-16 bg-gray-200 mt-2"></div>}
+                        {index < projectEvents.length - 1 && (
+                          <div className="w-px h-16 bg-gray-200 mt-2"></div>
+                        )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold">{event.title}</h3>
-                            <Badge className={getTypeColor(event.type)}>{event.type}</Badge>
+                            <Badge className={getTypeColor(event.type)}>
+                              {event.type}
+                            </Badge>
                           </div>
                           <div className="flex items-center gap-2">
                             {getStatusIcon(event.status)}
                             <span className="text-sm text-muted-foreground">
-                              {new Date(event.timestamp).toLocaleString("fr-FR")}
+                              {new Date(event.timestamp).toLocaleString(
+                                "fr-FR"
+                              )}
                             </span>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {event.description}
+                        </p>
                         {event.details && (
                           <div className="bg-gray-50 p-3 rounded text-xs text-gray-700">
                             {formatEventDetails(event.details, event.type)}
@@ -897,14 +973,16 @@ export function ProjectOverviewPage() {
                     <span className="font-medium">Base de données</span>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">Supabase PostgreSQL</Badge>
-                      {systemStatus && getSystemStatusBadge(systemStatus.database)}
+                      {systemStatus &&
+                        getSystemStatusBadge(systemStatus.database)}
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-purple-50 rounded">
                     <span className="font-medium">Blockchain</span>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">Hedera Hashgraph</Badge>
-                      {systemStatus && getSystemStatusBadge(systemStatus.hedera)}
+                      {systemStatus &&
+                        getSystemStatusBadge(systemStatus.hedera)}
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-orange-50 rounded">
@@ -932,21 +1010,32 @@ export function ProjectOverviewPage() {
                       <span>Taux de succès</span>
                       <span>{metrics?.successRate || 0}%</span>
                     </div>
-                    <Progress value={metrics?.successRate || 0} className="h-2" />
+                    <Progress
+                      value={metrics?.successRate || 0}
+                      className="h-2"
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Systèmes connectés</span>
                       <span>{metrics?.integrations || 0}/4</span>
                     </div>
-                    <Progress value={((metrics?.integrations || 0) / 4) * 100} className="h-2" />
+                    <Progress
+                      value={((metrics?.integrations || 0) / 4) * 100}
+                      className="h-2"
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Données disponibles</span>
-                      <span>{(metrics?.realTimeData.farms || 0) > 0 ? "100" : "0"}%</span>
+                      <span>
+                        {(metrics?.realTimeData.farms || 0) > 0 ? "100" : "0"}%
+                      </span>
                     </div>
-                    <Progress value={(metrics?.realTimeData.farms || 0) > 0 ? 100 : 0} className="h-2" />
+                    <Progress
+                      value={(metrics?.realTimeData.farms || 0) > 0 ? 100 : 0}
+                      className="h-2"
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -955,5 +1044,5 @@ export function ProjectOverviewPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
