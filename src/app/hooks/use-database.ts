@@ -139,7 +139,6 @@ export function useAIAgents(): AIAgentsResult {
         const data = await database.getAIAgents();
         setAgents(data);
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Erreur lors du chargement des agents:", error);
       } finally {
         setLoading(false);
@@ -159,7 +158,6 @@ export function useAIAgents(): AIAgentsResult {
         prev.map((agent) => (agent.id === id ? updatedAgent : agent))
       );
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Erreur lors de la mise à jour de l'agent:", error);
     }
   };

@@ -146,7 +146,6 @@ export function useDashboardData(): DashboardDataResult {
           riskPredictions,
         });
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error("Erreur lors du chargement des données:", err);
         setError(err instanceof Error ? err.message : "Erreur de chargement");
       } finally {
@@ -182,7 +181,6 @@ export function useAIAgents(): AIAgentsResult {
         if (error) throw error;
         setAgents(data || []);
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Erreur lors du chargement des agents:", error);
       } finally {
         setLoading(false);
@@ -210,7 +208,6 @@ export function useAIAgents(): AIAgentsResult {
         prev.map((agent) => (agent.id === id ? data : agent))
       );
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Erreur lors de la mise à jour de l'agent:", error);
     }
   };

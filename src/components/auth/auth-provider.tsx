@@ -46,7 +46,6 @@ export function AuthProvider({
           setProfile(profileData);
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Erreur lors de la récupération de la session:", error);
       } finally {
         setLoading(false);
@@ -72,7 +71,6 @@ export function AuthProvider({
 
           setProfile(profileData);
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error("Erreur lors de la récupération du profil:", error);
         }
       } else {
