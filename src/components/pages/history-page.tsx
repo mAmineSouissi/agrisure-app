@@ -150,7 +150,7 @@ export function HistoryPage(): JSX.Element {
           }
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
+        
         console.error("Error loading climate events:", err);
       }
 
@@ -183,7 +183,7 @@ export function HistoryPage(): JSX.Element {
           });
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
+        
         console.error("Error loading payments:", err);
       }
 
@@ -213,7 +213,7 @@ export function HistoryPage(): JSX.Element {
           }
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
+        
         console.error("Error loading sensor data:", err);
       }
 
@@ -251,7 +251,7 @@ export function HistoryPage(): JSX.Element {
           }
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
+        
         console.error("Error loading risk predictions:", err);
       }
 
@@ -282,7 +282,7 @@ export function HistoryPage(): JSX.Element {
           }
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
+        
         console.error("Error loading crop recommendations:", err);
       }
 
@@ -301,7 +301,7 @@ export function HistoryPage(): JSX.Element {
       setEvents(allEvents);
       setLastUpdate(new Date());
     } catch (err) {
-      // eslint-disable-next-line no-console
+      
       console.error("Erreur lors du chargement de l'historique:", err);
       setError("Erreur lors du chargement des données");
     } finally {
