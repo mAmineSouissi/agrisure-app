@@ -1,17 +1,28 @@
-import { supabase } from "./supabase"
+import { supabase, isSupabaseConfigured } from "./supabase";
 
 export interface SystemEvent {
-  event_type: string
-  title: string
-  description: string
-  status?: "completed" | "in-progress" | "failed"
-  details?: string
-  user_id?: string
+  event_type: string;
+  title: string;
+  description: string;
+  status?: "completed" | "in-progress" | "failed";
+  details?: string;
+  user_id?: string;
 }
 
 export class EventTracker {
+  // Vérifier la configuration Supabase
+  private static checkConfig(): boolean {
+    if (!isSupabaseConfigured()) {
+      console.warn("Supabase not configured - skipping event tracking");
+      return false;
+    }
+    return true;
+  }
+
   // Enregistrer un nouvel événement
   static async trackEvent(event: SystemEvent) {
+    if (!this.checkConfig()) return null;
+
     try {
       const { data, error } = await supabase
         .from("system_events")
@@ -25,26 +36,28 @@ export class EventTracker {
             user_id: event.user_id,
           },
         ])
-        .select()
+        .select();
 
-      if (error) throw error
-      console.log("✅ Événement enregistré:", event.title)
-      return data[0]
+      if (error) throw error;
+      console.log("✅ Événement enregistré:", event.title);
+      return data[0];
     } catch (error) {
-      console.error("❌ Erreur enregistrement événement:", error)
-      return null
+      console.error("❌ Erreur enregistrement événement:", error);
+      return null;
     }
   }
 
   // Enregistrer l'exécution d'un workflow
   static async trackWorkflowExecution(workflow: {
-    name: string
-    type: string
-    status: "success" | "failed" | "running"
-    executionTime?: number
-    dataProcessed?: number
-    description?: string
+    name: string;
+    type: string;
+    status: "success" | "failed" | "running";
+    executionTime?: number;
+    dataProcessed?: number;
+    description?: string;
   }) {
+    if (!this.checkConfig()) return null;
+
     try {
       const { data, error } = await supabase
         .from("n8n_workflow_executions")
@@ -58,27 +71,29 @@ export class EventTracker {
             description: workflow.description,
           },
         ])
-        .select()
+        .select();
 
-      if (error) throw error
-      console.log("✅ Workflow enregistré:", workflow.name)
-      return data[0]
+      if (error) throw error;
+      console.log("✅ Workflow enregistré:", workflow.name);
+      return data[0];
     } catch (error) {
-      console.error("❌ Erreur enregistrement workflow:", error)
-      return null
+      console.error("❌ Erreur enregistrement workflow:", error);
+      return null;
     }
   }
 
   // Enregistrer le déploiement d'un contrat
   static async trackContractDeployment(contract: {
-    userId: string
-    contractType: string
-    contractAddress?: string
-    network: string
-    coverageAmount: number
-    status: "pending" | "deployed" | "failed"
-    deploymentHash?: string
+    userId: string;
+    contractType: string;
+    contractAddress?: string;
+    network: string;
+    coverageAmount: number;
+    status: "pending" | "deployed" | "failed";
+    deploymentHash?: string;
   }) {
+    if (!this.checkConfig()) return null;
+
     try {
       const { data, error } = await supabase
         .from("smart_contracts")
@@ -91,68 +106,75 @@ export class EventTracker {
             coverage_amount: contract.coverageAmount,
             status: contract.status,
             deployment_hash: contract.deploymentHash,
-            deployed_at: contract.status === "deployed" ? new Date().toISOString() : null,
+            deployed_at:
+              contract.status === "deployed" ? new Date().toISOString() : null,
           },
         ])
-        .select()
+        .select();
 
-      if (error) throw error
-      console.log("✅ Contrat enregistré:", contract.contractType)
-      return data[0]
+      if (error) throw error;
+      console.log("✅ Contrat enregistré:", contract.contractType);
+      return data[0];
     } catch (error) {
-      console.error("❌ Erreur enregistrement contrat:", error)
-      return null
+      console.error("❌ Erreur enregistrement contrat:", error);
+      return null;
     }
   }
 
   // Récupérer les événements récents
   static async getRecentEvents(limit = 10) {
+    if (!this.checkConfig()) return [];
+
     try {
       const { data, error } = await supabase
         .from("system_events")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(limit)
+        .limit(limit);
 
-      if (error) throw error
-      return data || []
+      if (error) throw error;
+      return data || [];
     } catch (error) {
-      console.error("❌ Erreur récupération événements:", error)
-      return []
+      console.error("❌ Erreur récupération événements:", error);
+      return [];
     }
   }
 
   // Récupérer les workflows récents
   static async getRecentWorkflows(limit = 5) {
+    if (!this.checkConfig()) return [];
+
     try {
       const { data, error } = await supabase
         .from("n8n_workflow_executions")
         .select("*")
         .order("executed_at", { ascending: false })
-        .limit(limit)
+        .limit(limit);
 
-      if (error) throw error
-      return data || []
+      if (error) throw error;
+      return data || [];
     } catch (error) {
-      console.error("❌ Erreur récupération workflows:", error)
-      return []
+      console.error("❌ Erreur récupération workflows:", error);
+      return [];
     }
   }
 
   // Récupérer les contrats récents
   static async getRecentContracts(limit = 5) {
+    if (!this.checkConfig()) return [];
+
     try {
       const { data, error } = await supabase
         .from("smart_contracts")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(limit)
+        .limit(limit);
 
-      if (error) throw error
-      return data || []
+      if (error) throw error;
+      return data || [];
     } catch (error) {
-      console.error("❌ Erreur récupération contrats:", error)
-      return []
+      console.error("❌ Erreur récupération contrats:", error);
+      return [];
     }
   }
 }
