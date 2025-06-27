@@ -38,10 +38,6 @@ interface DashboardPageProps {
 export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const { data, loading } = useDashboardData();
 
-  // Calculate metrics from the actual data structure
-  // const coverage =
-  //   data?.farms?.reduce((sum, farm) => sum + (farm. || 0), 0) ||
-  //   1000;
   const protectedDays = 365; // You could calculate this based on active contracts
   const paymentsReceived: number = data?.payments?.length || 0;
   const smartContracts: number =
@@ -153,21 +149,6 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
       {/* Métriques rapides */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Couverture totale
-                </p>
-                <p className="text-2xl font-bold text-green-600">
-                  {loading ? "..." : `${coverage.toLocaleString()} $`}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
