@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,12 +65,12 @@ interface FilterOptions {
   search: string;
 }
 
-export function HistoryPage(): JSX.Element {
+export function HistoryPage() {
   const { user } = useAuth();
   const [events, setEvents] = useState<HistoryEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<HistoryEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [farms, setFarms] = useState<{ id: string; name: string }[]>([]);
+  const [farms, setFarms] = useState<{ id: number; name: string }[]>([]);
   const [filters, setFilters] = useState<FilterOptions>({
     type: "all",
     status: "all",
@@ -199,13 +199,13 @@ export function HistoryPage(): JSX.Element {
                 type: "sensor",
                 title: `Lecture capteur`,
                 description: `Données capteur mises à jour sur ${farm.name}`,
-                status: reading.soil_humidity < 10 ? "warning" : "success",
+                status: (reading.soil_humidity || 0) < 10 ? "warning" : "success",
                 farmName: farm.name,
                 details: {
-                  soilHumidity: reading.soil_humidity,
-                  soilTemperature: reading.soil_temperature,
-                  salinity: reading.salinity,
-                  ph: reading.ph,
+                  soilHumidity: reading.soil_humidity || 0,
+                  soilTemperature: reading.temperature || 0,
+                  salinity: reading.salinity || 0,
+                  ph: reading.ph_level || 0,
                   farmName: farm.name,
                 },
               });
@@ -225,18 +225,18 @@ export function HistoryPage(): JSX.Element {
             for (const prediction of predictions.slice(0, 5)) {
               allEvents.push({
                 id: `prediction-${prediction.id}`,
-                timestamp: prediction.created_at,
+                timestamp: prediction.created_at || new Date().toISOString(),
                 type: "prediction",
                 title: `Prédiction de risque`,
                 description: `Risque ${
-                  prediction.risk_type
+                  prediction.risk_type || 'inconnu'
                 } prédit avec ${Math.round(
-                  prediction.probability * 100
+                  (prediction.probability || 0) * 100
                 )}% de probabilité`,
                 status:
-                  prediction.probability > 0.7
+                  (prediction.probability || 0) > 0.7
                     ? "error"
-                    : prediction.probability > 0.4
+                    : (prediction.probability || 0) > 0.4
                     ? "warning"
                     : "info",
                 farmName: farm.name,
@@ -244,7 +244,7 @@ export function HistoryPage(): JSX.Element {
                   riskType: prediction.risk_type,
                   probability: prediction.probability,
                   validUntil: prediction.valid_until,
-                  recommendations: prediction.recommendations,
+                  description: prediction.description,
                 },
               });
             }
@@ -265,17 +265,17 @@ export function HistoryPage(): JSX.Element {
             for (const rec of recommendations.slice(0, 3)) {
               allEvents.push({
                 id: `crop-${rec.id}`,
-                timestamp: rec.recommended_date,
+                timestamp: rec.recommended_date || rec.created_at || new Date().toISOString(),
                 type: "prediction",
                 title: `Recommandation de culture`,
-                description: `Culture ${rec.crop_type} recommandée avec score de ${rec.confidence_score}`,
+                description: `Culture ${rec.crop || rec.crop_name || 'inconnue'} recommandée avec score de ${rec.confidence || rec.ai_confidence || 0}`,
                 status: "info",
                 farmName: farm.name,
                 details: {
-                  cropType: rec.crop_type,
-                  confidenceScore: rec.confidence_score,
-                  reasoning: rec.reasoning,
-                  expectedYield: rec.expected_yield,
+                  cropType: rec.crop || rec.crop_name,
+                  confidenceScore: rec.confidence || rec.ai_confidence,
+                  reasoning: rec.reason,
+                  plantingDate: rec.plantingDate,
                 },
               });
             }
@@ -425,7 +425,7 @@ export function HistoryPage(): JSX.Element {
     setFilteredEvents(filtered);
   };
 
-  const getEventIcon = (type: string): JSX.Element => {
+  const getEventIcon = (type: string): React.JSX.Element => {
     switch (type) {
       case "climate":
         return <CloudRain className="h-4 w-4" />;
@@ -444,7 +444,7 @@ export function HistoryPage(): JSX.Element {
     }
   };
 
-  const getStatusIcon = (status: string): JSX.Element => {
+  const getStatusIcon = (status: string): React.JSX.Element => {
     switch (status) {
       case "success":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -459,7 +459,7 @@ export function HistoryPage(): JSX.Element {
     }
   };
 
-  const getStatusBadge = (status: string): JSX.Element => {
+  const getStatusBadge = (status: string): React.JSX.Element => {
     switch (status) {
       case "success":
         return <Badge className="bg-green-100 text-green-800">Succès</Badge>;
@@ -476,7 +476,7 @@ export function HistoryPage(): JSX.Element {
     }
   };
 
-  const getTypeBadge = (type: string): JSX.Element => {
+  const getTypeBadge = (type: string): React.JSX.Element => {
     switch (type) {
       case "climate":
         return <Badge className="bg-blue-100 text-blue-800">Climat</Badge>;
@@ -548,27 +548,27 @@ export function HistoryPage(): JSX.Element {
 
   const counts = getEventCounts();
 
-  const formatEventDetails = (event: HistoryEvent): JSX.Element => {
+  const formatEventDetails = (event: HistoryEvent): React.JSX.Element => {
     switch (event.type) {
       case "climate":
         return (
           <div className="space-y-1 text-xs">
             <div>
               <span className="font-medium">Type:</span>{" "}
-              {event.details.eventType as string}
+              {String(event.details.eventType)}
             </div>
             <div>
               <span className="font-medium">Sévérité:</span>{" "}
-              {event.details.severity as string}
+              {String(event.details.severity)}
             </div>
             <div>
               <span className="font-medium">Vérifié:</span>{" "}
               {event.details.verified ? "Oui" : "Non"}
             </div>
-            {event.details.endDate && (
+            {hasValue(event.details.endDate) && (
               <div>
                 <span className="font-medium">Fin:</span>{" "}
-                {new Date(event.details.endDate as string).toLocaleDateString(
+                {new Date(renderValue(event.details.endDate)).toLocaleDateString(
                   "fr-FR"
                 )}
               </div>
@@ -582,16 +582,16 @@ export function HistoryPage(): JSX.Element {
             <div>
               <span className="font-medium">Montant:</span>{" "}
               {event.details.amount as number}{" "}
-              {event.details.currency as string}
+              {String(event.details.currency)}
             </div>
             <div>
               <span className="font-medium">Statut:</span>{" "}
-              {event.details.status as string}
+              {String(event.details.status)}
             </div>
-            {event.details.hederaTransactionId && (
+            {hasValue(event.details.hederaTransactionId) && (
               <div>
                 <span className="font-medium">TX ID:</span>{" "}
-                {(event.details.hederaTransactionId as string).slice(0, 20)}...
+                {renderValue(event.details.hederaTransactionId).slice(0, 20)}...
               </div>
             )}
           </div>
@@ -648,11 +648,11 @@ export function HistoryPage(): JSX.Element {
                 <span className="font-medium">Probabilité:</span>{" "}
                 {Math.round((event.details.probability as number) * 100)}%
               </div>
-              {event.details.validUntil && (
+              {hasValue(event.details.validUntil) && (
                 <div>
                   <span className="font-medium">Valide jusqu&apos;au:</span>{" "}
                   {new Date(
-                    event.details.validUntil as string
+                    renderValue(event.details.validUntil)
                   ).toLocaleDateString("fr-FR")}
                 </div>
               )}
@@ -663,31 +663,31 @@ export function HistoryPage(): JSX.Element {
       case "contract":
         return (
           <div className="space-y-1 text-xs">
-            {event.details.contractId && (
+            {hasValue(event.details.contractId) && (
               <div>
                 <span className="font-medium">Contract ID:</span>{" "}
-                {event.details.contractId as string}
+                {renderValue(event.details.contractId)}
               </div>
             )}
-            {event.details.type && (
+            {hasValue(event.details.type) && (
               <div>
                 <span className="font-medium">Type:</span>{" "}
-                {event.details.type as string}
+                {renderValue(event.details.type)}
               </div>
             )}
-            {event.details.coverage && (
+            {hasValue(event.details.coverage) && (
               <div>
                 <span className="font-medium">Couverture:</span>{" "}
-                {event.details.coverage as string}
+                {renderValue(event.details.coverage)}
               </div>
             )}
-            {event.details.network && (
+            {hasValue(event.details.network) && (
               <div>
                 <span className="font-medium">Réseau:</span>{" "}
-                {event.details.network as string}
+                {renderValue(event.details.network)}
               </div>
             )}
-            {event.details.aiGenerated && (
+            {hasValue(event.details.aiGenerated) && (
               <div>
                 <span className="font-medium">Généré par IA:</span> Oui
               </div>
@@ -702,22 +702,22 @@ export function HistoryPage(): JSX.Element {
               <span className="font-medium">Type:</span>{" "}
               {event.details.workflowType as string}
             </div>
-            {event.details.executionTime && (
+            {hasValue(event.details.executionTime) && (
               <div>
                 <span className="font-medium">Durée:</span>{" "}
-                {event.details.executionTime as string}
+                {renderValue(event.details.executionTime)}
               </div>
             )}
-            {event.details.dataProcessed && (
+            {hasValue(event.details.dataProcessed) && (
               <div>
                 <span className="font-medium">Données:</span>{" "}
-                {event.details.dataProcessed as number} éléments
+                {renderValue(event.details.dataProcessed)} éléments
               </div>
             )}
-            {event.details.risksDetected && (
+            {hasValue(event.details.risksDetected) && (
               <div>
                 <span className="font-medium">Risques détectés:</span>{" "}
-                {event.details.risksDetected as number}
+                {renderValue(event.details.risksDetected)}
               </div>
             )}
           </div>
@@ -730,6 +730,16 @@ export function HistoryPage(): JSX.Element {
           </div>
         );
     }
+  };
+
+  // Helper function to safely check and render unknown values
+  const renderValue = (value: unknown): string => {
+    if (value === null || value === undefined) return "";
+    return String(value);
+  };
+
+  const hasValue = (value: unknown): boolean => {
+    return value !== null && value !== undefined && value !== "";
   };
 
   if (!user) {
@@ -925,7 +935,7 @@ export function HistoryPage(): JSX.Element {
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-              <span>Chargement de l'historique...</span>
+              <span>Chargement de l&apos;historique...</span>
             </div>
           ) : filteredEvents.length === 0 ? (
             <Card>

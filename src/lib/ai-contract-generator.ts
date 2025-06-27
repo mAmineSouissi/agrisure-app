@@ -502,10 +502,15 @@ COMPATIBILITÉ HEDERA:
 
   // Expliquer le fonctionnement d'un contrat avec NFT
   async explainContract(contractCode: string): Promise<string> {
+    // You can optionally use contractCode inside your explanation
+    // For example, just append or embed it:
     return `# 🎨 Smart Contract AgriSure avec NFT
 
 ## 🎯 **Innovation : Police d'Assurance = NFT**
 Ce smart contract révolutionnaire transforme chaque police d'assurance agricole en NFT unique sur Hedera Hashgraph. Chaque agriculteur reçoit un token non-fongible représentant sa couverture.
+
+-- Contrat fourni --
+${contractCode}
 
 ## 🖼️ **Fonctionnalités NFT**
 

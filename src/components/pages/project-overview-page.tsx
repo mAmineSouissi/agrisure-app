@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -67,7 +67,7 @@ interface SystemStatus {
   api: "operational" | "degraded" | "down";
 }
 
-export function ProjectOverviewPage(): JSX.Element {
+export function ProjectOverviewPage(): React.JSX.Element {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("timeline");
   const [projectEvents, setProjectEvents] = useState<ProjectEvent[]>([]);
@@ -342,7 +342,7 @@ export function ProjectOverviewPage(): JSX.Element {
             const latestPrediction = predictions[0];
             events.push({
               id: "ai-prediction",
-              timestamp: latestPrediction.created_at,
+              timestamp: latestPrediction.created_at ?? "",
               type: "integration",
               title: "Prédiction IA générée",
               description: `Risque ${latestPrediction.risk_type} détecté`,
@@ -494,7 +494,7 @@ export function ProjectOverviewPage(): JSX.Element {
     ]);
   };
 
-  const getStatusIcon = (status: string): JSX.Element => {
+  const getStatusIcon = (status: string): React.JSX.Element => {
     switch (status) {
       case "completed":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -507,7 +507,7 @@ export function ProjectOverviewPage(): JSX.Element {
     }
   };
 
-  const getTypeIcon = (type: string): JSX.Element => {
+  const getTypeIcon = (type: string): React.JSX.Element => {
     switch (type) {
       case "database":
         return <Database className="h-5 w-5 text-blue-600" />;
@@ -541,7 +541,7 @@ export function ProjectOverviewPage(): JSX.Element {
     }
   };
 
-  const getSystemStatusBadge = (status: string): JSX.Element => {
+  const getSystemStatusBadge = (status: string): React.JSX.Element => {
     switch (status) {
       case "connected":
         return (
@@ -593,7 +593,7 @@ export function ProjectOverviewPage(): JSX.Element {
   const formatEventDetails = (
     details: Record<string, unknown>,
     type: string
-  ): JSX.Element | null => {
+  ): React.JSX.Element | null => {
     if (!details) return null;
 
     switch (type) {
@@ -659,7 +659,7 @@ export function ProjectOverviewPage(): JSX.Element {
         return (
           <div className="space-y-1">
             <div>
-              <span className="font-medium">Nombre d'agents:</span>{" "}
+              <span className="font-medium">Nombre d&apos;agents:</span>{" "}
               {(details.agentCount as number) || "N/A"}
             </div>
             <div>
@@ -702,7 +702,7 @@ export function ProjectOverviewPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-green-800">
-            Vue d'ensemble du Projet AgriSure
+            Vue d&apos;ensemble du Projet AgriSure
           </h1>
           <p className="text-muted-foreground">
             Données en temps réel • Dernière mise à jour:{" "}
@@ -905,8 +905,8 @@ export function ProjectOverviewPage(): JSX.Element {
               <div className="space-y-4">
                 {projectEvents.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    Aucun événement récent. Utilisez l'application pour générer
-                    de l'activité.
+                    Aucun événement récent. Utilisez l&apos;application pour générer
+                    de l&apos;activité.
                   </p>
                 ) : (
                   projectEvents.map((event, index) => (

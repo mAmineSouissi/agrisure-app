@@ -18,7 +18,6 @@ import {
   Thermometer,
   TrendingUp,
   Calendar,
-  DollarSign,
   Code,
   Zap,
   Brain,
@@ -36,15 +35,31 @@ interface DashboardPageProps {
   onNavigate: (page: string) => void;
 }
 
-export function DashboardPage({ onNavigate }: DashboardPageProps): JSX.Element {
+export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const { data, loading } = useDashboardData();
 
-  const coverage = data?.coverage || 0;
-  const protectedDays = data?.protectedDays || 0;
+  // Calculate metrics from the actual data structure
+  // const coverage =
+  //   data?.farms?.reduce((sum, farm) => sum + (farm. || 0), 0) ||
+  //   1000;
+  const protectedDays = 365; // You could calculate this based on active contracts
   const paymentsReceived: number = data?.payments?.length || 0;
-  const smartContracts: number = data?.contracts?.length || 0;
+  const smartContracts: number =
+    data?.agents?.filter((agent) => agent.type === "contract")?.length || 0;
 
-  const riskData: RiskDataItem[] = data?.riskData || [
+  const riskData: RiskDataItem[] = data?.riskPredictions
+    ?.slice(0, 3)
+    .map((risk) => ({
+      risk: risk.risk_type || "Sécheresse",
+      probability: `${Math.round((risk.probability || 0.7) * 100)}%`,
+      impact: risk.severity || "Élevé",
+      color:
+        (risk.probability || 0.7) > 0.6
+          ? "destructive"
+          : (risk.probability || 0.7) > 0.3
+          ? "secondary"
+          : "outline",
+    })) || [
     {
       risk: "Sécheresse",
       probability: "70%",
@@ -138,7 +153,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps): JSX.Element {
 
       {/* Métriques rapides */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        {/* <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
@@ -152,7 +167,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps): JSX.Element {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -208,7 +223,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps): JSX.Element {
               <div>
                 <h3 className="font-semibold">Générer un contrat</h3>
                 <p className="text-sm text-muted-foreground">
-                  Créer un nouveau smart contract avec l'IA
+                  Créer un nouveau smart contract avec l&apos;IA
                 </p>
               </div>
             </div>
@@ -246,7 +261,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps): JSX.Element {
               <div>
                 <h3 className="font-semibold">Assistant IA</h3>
                 <p className="text-sm text-muted-foreground">
-                  Poser une question à l'assistant
+                  Poser une question à l&apos;assistant
                 </p>
               </div>
             </div>
@@ -264,7 +279,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps): JSX.Element {
             </CardDescription>
           </div>
           <Button variant="outline" onClick={() => onNavigate("history")}>
-            Voir l'historique
+            Voir l&apos;historique
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">

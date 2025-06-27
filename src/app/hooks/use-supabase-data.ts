@@ -3,45 +3,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/auth/auth-provider";
-
-interface Farm {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface Payment {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface Agent {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface ClimateEvent {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface Recommendation {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface RiskPrediction {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface DashboardData {
-  farms: Farm[];
-  payments: Payment[];
-  agents: Agent[];
-  climateEvents: ClimateEvent[];
-  recommendations: Recommendation[];
-  riskPredictions: RiskPrediction[];
-}
+import type {
+  Farm,
+  InsurancePayment,
+  AIAgent,
+  ClimateEvent,
+  CropRecommendation,
+  RiskPrediction,
+  DashboardData,
+} from "@/lib/types";
 
 interface DashboardDataResult {
   data: DashboardData | null;
@@ -102,7 +72,7 @@ export function useDashboardData(): DashboardDataResult {
 
         // Si l'utilisateur a des fermes, récupérer les données spécifiques
         let climateEvents: ClimateEvent[] = [];
-        let recommendations: Recommendation[] = [];
+        let recommendations: CropRecommendation[] = [];
         let riskPredictions: RiskPrediction[] = [];
 
         if (farms && farms.length > 0) {
@@ -132,18 +102,19 @@ export function useDashboardData(): DashboardDataResult {
             .gte("valid_until", new Date().toISOString())
             .order("probability", { ascending: false });
 
-          climateEvents = events || [];
-          recommendations = recs || [];
-          riskPredictions = risks || [];
+          climateEvents = (events || []) as ClimateEvent[];
+          recommendations = (recs || []) as CropRecommendation[];
+          riskPredictions = (risks || []) as RiskPrediction[];
         }
 
         setData({
-          farms: farms || [],
-          payments: payments || [],
-          agents: agents || [],
+          farms: (farms || []) as Farm[],
+          payments: (payments || []) as InsurancePayment[],
+          agents: (agents || []) as AIAgent[],
           climateEvents,
           recommendations,
           riskPredictions,
+          sensorData: [], // Add empty array for now
         });
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err);
@@ -161,13 +132,13 @@ export function useDashboardData(): DashboardDataResult {
 
 // Hook pour les agents IA
 interface AIAgentsResult {
-  agents: Agent[];
+  agents: AIAgent[];
   loading: boolean;
-  updateAgent: (id: number, updates: Partial<Agent>) => Promise<void>;
+  updateAgent: (id: number, updates: Partial<AIAgent>) => Promise<void>;
 }
 
 export function useAIAgents(): AIAgentsResult {
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<AIAgent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -192,7 +163,7 @@ export function useAIAgents(): AIAgentsResult {
 
   const updateAgent = async (
     id: number,
-    updates: Partial<Agent>
+    updates: Partial<AIAgent>
   ): Promise<void> => {
     try {
       const { data, error } = await supabase
@@ -205,7 +176,7 @@ export function useAIAgents(): AIAgentsResult {
       if (error) throw error;
 
       setAgents((prev) =>
-        prev.map((agent) => (agent.id === id ? data : agent))
+        prev.map((agent) => (agent.id === id ? (data as AIAgent) : agent))
       );
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'agent:", error);

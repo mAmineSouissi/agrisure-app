@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Message } from "@/lib/types";
 import {
   Send,
   Bot,
@@ -16,21 +17,12 @@ import {
   Lightbulb,
 } from "lucide-react";
 
-interface Message {
-  id: number;
-  type: "user" | "bot";
-  content: string;
-  timestamp: Date;
-  suggestions?: string[];
-}
-
-export function ChatbotPage(): JSX.Element {
+export function ChatbotPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: 1,
-      type: "bot",
-      content:
-        "Bonjour ! Je suis votre assistant IA AgriSure. Je peux vous aider avec vos questions sur l'assurance climatique, les recommandations de cultures, et l'analyse des risques. Comment puis-je vous aider aujourd'hui ?",
+      id: "1",
+      sender: "bot",
+      text: "Bonjour ! Je suis votre assistant IA AgriSure. Je peux vous aider avec vos questions sur l'assurance climatique, les recommandations de cultures, et l'analyse des risques. Comment puis-je vous aider aujourd'hui ?",
       timestamp: new Date(),
       suggestions: [
         "Quel est le risque de sécheresse cette semaine ?",
@@ -56,9 +48,9 @@ export function ChatbotPage(): JSX.Element {
     if (!content.trim()) return;
 
     const userMessage: Message = {
-      id: Date.now(),
-      type: "user",
-      content: content.trim(),
+      id: Date.now().toString(),
+      sender: "user",
+      text: content.trim(),
       timestamp: new Date(),
     };
 
@@ -124,9 +116,9 @@ export function ChatbotPage(): JSX.Element {
     }
 
     return {
-      id: Date.now(),
-      type: "bot",
-      content: response,
+      id: Date.now().toString(),
+      sender: "bot",
+      text: response,
       timestamp: new Date(),
       suggestions,
     };
@@ -177,10 +169,10 @@ export function ChatbotPage(): JSX.Element {
               <div
                 key={message.id}
                 className={`flex gap-3 ${
-                  message.type === "user" ? "justify-end" : "justify-start"
+                  message.sender === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                {message.type === "bot" && (
+                {message.sender === "bot" && (
                   <Avatar className="h-8 w-8 bg-green-600">
                     <AvatarFallback>
                       <Bot className="h-4 w-4 text-white" />
@@ -190,18 +182,18 @@ export function ChatbotPage(): JSX.Element {
 
                 <div
                   className={`max-w-[80%] ${
-                    message.type === "user" ? "order-first" : ""
+                    message.sender === "user" ? "order-first" : ""
                   }`}
                 >
                   <div
                     className={`p-3 rounded-lg ${
-                      message.type === "user"
+                      message.sender === "user"
                         ? "bg-green-600 text-white ml-auto"
                         : "bg-muted"
                     }`}
                   >
                     <div className="whitespace-pre-wrap text-sm">
-                      {message.content}
+                      {message.text}
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 px-1">
@@ -212,7 +204,7 @@ export function ChatbotPage(): JSX.Element {
                   </p>
 
                   {/* Suggestions */}
-                  {message.type === "bot" && message.suggestions && (
+                  {message.sender === "bot" && message.suggestions && (
                     <div className="mt-3 space-y-2">
                       <p className="text-xs text-muted-foreground px-1">
                         Suggestions :
@@ -234,7 +226,7 @@ export function ChatbotPage(): JSX.Element {
                   )}
                 </div>
 
-                {message.type === "user" && (
+                {message.sender === "user" && (
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>
                       <User className="h-4 w-4" />

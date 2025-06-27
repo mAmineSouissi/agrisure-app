@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -78,7 +78,7 @@ interface NFTData {
   hederaExplorerUrl: string;
 }
 
-export function SmartContractsPage(): JSX.Element {
+export function SmartContractsPage(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState("generator");
   const [contractRequirements, setContractRequirements] =
     useState<ContractRequirements>({
@@ -263,7 +263,7 @@ export function SmartContractsPage(): JSX.Element {
         </h1>
         <p className="text-muted-foreground">
           Générez des contrats intelligents avec NFT automatique pour
-          l'assurance agricole
+          l&apos;assurance agricole
         </p>
       </div>
 
@@ -377,7 +377,7 @@ export function SmartContractsPage(): JSX.Element {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="insuranceType">Type d'assurance</Label>
+                  <Label htmlFor="insuranceType">Type d&apos;assurance</Label>
                   <Select
                     value={contractRequirements.insuranceType}
                     onValueChange={(value) =>
@@ -533,7 +533,7 @@ export function SmartContractsPage(): JSX.Element {
                       NFT généré automatiquement
                     </p>
                     <p className="text-xs text-purple-500">
-                      Représente votre police d'assurance
+                      Représente votre police d&apos;assurance
                     </p>
                   </div>
                 </div>
@@ -626,7 +626,7 @@ export function SmartContractsPage(): JSX.Element {
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Votre police d'assurance est maintenant un NFT unique sur
+                  Votre police d&apos;assurance est maintenant un NFT unique sur
                   Hedera Hashgraph
                 </CardDescription>
               </CardHeader>
@@ -917,7 +917,7 @@ export function SmartContractsPage(): JSX.Element {
             <ImageIcon className="h-16 w-16 mx-auto text-pink-400 mb-4" />
             <h3 className="text-xl font-semibold mb-2">Galerie NFT AgriSure</h3>
             <p className="text-muted-foreground mb-6">
-              Collection de toutes les polices d'assurance sous forme de NFTs
+              Collection de toutes les polices d&apos;assurance sous forme de NFTs
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -1017,7 +1017,7 @@ export function SmartContractsPage(): JSX.Element {
                   <Badge variant="secondary">7</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Exécutions aujourd'hui</span>
+                  <span className="text-sm">Exécutions aujourd&apos;hui</span>
                   <span className="text-sm font-medium">52</span>
                 </div>
                 <div className="flex items-center justify-between">

@@ -2,52 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { database } from "@/lib/database";
+import type {
+  ClimateEvent,
+  AIAgent,
+  CropRecommendation,
+  SensorData,
+  RiskPrediction,
+  DashboardData,
+} from "@/lib/types";
 import { useAuth } from "@/components/auth/auth-provider";
-
-interface Farm {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface Payment {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface Agent {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface ClimateEvent {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface Recommendation {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface SensorData {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface RiskPrediction {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface DashboardData {
-  farms: Farm[];
-  payments: Payment[];
-  agents: Agent[];
-  climateEvents: ClimateEvent[];
-  recommendations: Recommendation[];
-  sensorData: SensorData[];
-  riskPredictions: RiskPrediction[];
-}
 
 interface DashboardDataResult {
   data: DashboardData | null;
@@ -77,7 +40,7 @@ export function useDashboardData(): DashboardDataResult {
       ]);
 
       let climateEvents: ClimateEvent[] = [];
-      let recommendations: Recommendation[] = [];
+      let recommendations: CropRecommendation[] = [];
       let sensorData: SensorData[] = [];
       let riskPredictions: RiskPrediction[] = [];
 
@@ -124,13 +87,13 @@ export function useDashboardData(): DashboardDataResult {
 
 // Hook pour les agents IA
 interface AIAgentsResult {
-  agents: Agent[];
+  agents: AIAgent[];
   loading: boolean;
-  updateAgent: (id: number, updates: Partial<Agent>) => Promise<void>;
+  updateAgent: (id: number, updates: Partial<AIAgent>) => Promise<void>;
 }
 
 export function useAIAgents(): AIAgentsResult {
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<AIAgent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -150,13 +113,15 @@ export function useAIAgents(): AIAgentsResult {
 
   const updateAgent = async (
     id: number,
-    updates: Partial<Agent>
+    updates: Partial<AIAgent>
   ): Promise<void> => {
     try {
       const updatedAgent = await database.updateAIAgent(id, updates);
-      setAgents((prev) =>
-        prev.map((agent) => (agent.id === id ? updatedAgent : agent))
-      );
+      if (updatedAgent) {
+        setAgents((prev) =>
+          prev.map((agent) => (agent.id === id ? updatedAgent : agent))
+        );
+      }
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'agent:", error);
     }

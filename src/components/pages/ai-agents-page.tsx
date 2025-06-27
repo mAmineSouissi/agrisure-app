@@ -39,7 +39,7 @@ interface Agent {
   enabled: boolean;
 }
 
-export function AIAgentsPage(): JSX.Element {
+export function AIAgentsPage(){
   const [agents, setAgents] = useState<Agent[]>([
     {
       id: 1,
@@ -122,7 +122,7 @@ export function AIAgentsPage(): JSX.Element {
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-green-800">Agents IA</h1>
         <p className="text-muted-foreground">
-          Gérez vos agents d'intelligence artificielle pour l'analyse agricole
+          Gérez vos agents d&apos;intelligence artificielle pour l&apos;analyse agricole
         </p>
       </div>
 
@@ -292,7 +292,7 @@ export function AIAgentsPage(): JSX.Element {
             Intégration n8n
           </CardTitle>
           <CardDescription>
-            Configuration de l'intégration avec n8n pour l'orchestration des
+            Configuration de l&apos;intégration avec n8n pour l&apos;orchestration des
             agents IA
           </CardDescription>
         </CardHeader>
