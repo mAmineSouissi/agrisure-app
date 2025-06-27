@@ -18,7 +18,6 @@ import {
   Thermometer,
   TrendingUp,
   Calendar,
-  DollarSign,
   Code,
   Zap,
   Brain,
@@ -40,9 +39,9 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const { data, loading } = useDashboardData();
 
   // Calculate metrics from the actual data structure
-  const coverage =
-    data?.farms?.reduce((sum, farm) => sum + (farm.coverage_amount || 0), 0) ||
-    1000;
+  // const coverage =
+  //   data?.farms?.reduce((sum, farm) => sum + (farm. || 0), 0) ||
+  //   1000;
   const protectedDays = 365; // You could calculate this based on active contracts
   const paymentsReceived: number = data?.payments?.length || 0;
   const smartContracts: number =
@@ -154,7 +153,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
       {/* Métriques rapides */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        {/* <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
@@ -168,7 +167,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">

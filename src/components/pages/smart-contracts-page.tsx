@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -78,7 +78,7 @@ interface NFTData {
   hederaExplorerUrl: string;
 }
 
-export function SmartContractsPage(): JSX.Element {
+export function SmartContractsPage(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState("generator");
   const [contractRequirements, setContractRequirements] =
     useState<ContractRequirements>({

@@ -1,60 +1,14 @@
 import { supabase } from "./supabase";
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar_url?: string;
-  created_at: string;
-}
-
-export interface Farm {
-  id: number;
-  user_id: string;
-  name: string;
-  location: string;
-  size_hectares: number;
-  soil_type: string;
-  created_at: string;
-}
-
-export interface ClimateEvent {
-  id: number;
-  farm_id: number;
-  event_type: string;
-  severity: string;
-  start_date: string;
-  end_date?: string;
-  description: string;
-  verified: boolean;
-  created_at: string;
-}
-
-export interface InsurancePayment {
-  id: number;
-  user_id: string;
-  climate_event_id: number;
-  amount: number;
-  currency: string;
-  status: string;
-  hedera_transaction_id?: string;
-  paid_at?: string;
-  created_at: string;
-}
-
-export interface AIAgent {
-  id: number;
-  name: string;
-  type: string;
-  status: string;
-  last_run?: string;
-  accuracy_rate: number;
-  total_predictions: number;
-  config?: Record<string, unknown>;
-  n8n_workflow_id?: string;
-  created_at: string;
-  updated_at: string;
-}
+import type {
+  User,
+  Farm,
+  ClimateEvent,
+  InsurancePayment,
+  AIAgent,
+  CropRecommendation,
+  SensorData,
+  RiskPrediction
+} from "./types";
 
 export const database = {
   async getUser(id: string): Promise<User | null> {
@@ -105,7 +59,7 @@ export const database = {
     return data as InsurancePayment[];
   },
 
-  async getCropRecommendations(farmId: number): Promise<unknown[]> {
+  async getCropRecommendations(farmId: number): Promise<CropRecommendation[]> {
     const { data, error } = await supabase
       .from("crop_recommendations")
       .select("*")
@@ -113,10 +67,10 @@ export const database = {
       .order("recommended_date", { ascending: false })
       .limit(5);
     if (error) throw error;
-    return data;
+    return data as CropRecommendation[];
   },
 
-  async getLatestSensorData(farmId: number): Promise<unknown[]> {
+  async getLatestSensorData(farmId: number): Promise<SensorData[]> {
     const { data, error } = await supabase
       .from("sensor_data")
       .select("*")
@@ -124,10 +78,10 @@ export const database = {
       .order("recorded_at", { ascending: false })
       .limit(10);
     if (error) throw error;
-    return data;
+    return data as SensorData[];
   },
 
-  async getRiskPredictions(farmId: number): Promise<unknown[]> {
+  async getRiskPredictions(farmId: number): Promise<RiskPrediction[]> {
     const { data, error } = await supabase
       .from("risk_predictions")
       .select("*")
@@ -135,7 +89,7 @@ export const database = {
       .gte("valid_until", new Date().toISOString())
       .order("probability", { ascending: false });
     if (error) throw error;
-    return data;
+    return data as RiskPrediction[];
   },
 
   async getAIAgents(): Promise<AIAgent[]> {

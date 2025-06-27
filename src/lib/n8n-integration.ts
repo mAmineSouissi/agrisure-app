@@ -1,30 +1,15 @@
-interface N8nWorkflow {
-  id: string;
-  name: string;
-  active: boolean;
-  nodes: unknown[];
-}
+import type {
+  N8nWorkflow,
+  WeatherData,
+  SensorData,
+  CropRecommendation,
+} from "./types";
 
-interface WeatherData {
-  temperature: number;
-  humidity: number;
-  precipitation: number;
-  windSpeed: number;
-}
-
-interface SensorData {
-  farmId: number;
+interface Anomaly {
+  type: string;
   soilHumidity: number;
-  soilTemperature: number;
-  salinity: number;
-  timestamp: string;
-}
-
-interface CropRecommendation {
-  crop: string;
-  confidence: number;
-  reason: string;
-  plantingDate: string;
+  precipitation: number;
+  temperature: number;
 }
 
 export class N8nService {
@@ -81,7 +66,7 @@ export class N8nService {
     try {
       const webhookUrl = `${this.baseUrl}/webhook/sensor-data-processing`;
       console.log(
-        `📊 Traitement données capteurs pour ferme ${sensorData.farmId}`
+        `📊 Traitement données capteurs pour ferme ${sensorData.farm_id}`
       );
 
       const response = await fetch(webhookUrl, {
@@ -107,10 +92,10 @@ export class N8nService {
 
       if (data.anomalyDetected) {
         console.log(
-          `🚨 Anomalie détectée pour ferme ${sensorData.farmId}:`,
+          `🚨 Anomalie détectée pour ferme ${sensorData.farm_id}:`,
           data.anomalies
         );
-        await this.triggerAlertWorkflow(sensorData.farmId, data.anomalies[0]);
+        await this.triggerAlertWorkflow(sensorData.farm_id, data.anomalies[0]);
       }
 
       console.log(
@@ -293,20 +278,20 @@ export class N8nService {
   }
 
   private calculateSeverity(anomaly: unknown): number {
-    // You may want to refine this type and logic
-    if (
-      typeof anomaly === "object" &&
-      anomaly !== null &&
-      "type" in anomaly &&
-      "soilHumidity" in anomaly &&
-      "precipitation" in anomaly &&
-      "temperature" in anomaly
-    ) {
-      // @ts-expect-error: dynamic property access
+    const isAnomaly = (obj: unknown): obj is Anomaly => {
+      return (
+        typeof obj === "object" &&
+        obj !== null &&
+        "type" in obj &&
+        "soilHumidity" in obj &&
+        "precipitation" in obj &&
+        "temperature" in obj
+      );
+    };
+
+    if (isAnomaly(anomaly)) {
       if (anomaly.type === "drought" && anomaly.soilHumidity < 10) return 9;
-      // @ts-expect-error: dynamic property access
       if (anomaly.type === "flood" && anomaly.precipitation > 100) return 8;
-      // @ts-expect-error: dynamic property access
       if (anomaly.type === "temperature" && anomaly.temperature > 40) return 7;
     }
     return 5;
@@ -347,14 +332,18 @@ export class N8nService {
 
   private simulateSensorResponse(sensorData: SensorData): void {
     console.log(
-      `📊 [SIMULATION] Données capteurs traitées pour ferme ${sensorData.farmId}`
+      `📊 [SIMULATION] Données capteurs traitées pour ferme ${sensorData.farm_id}`
     );
     console.log(
-      `🌱 [SIMULATION] Sol: ${sensorData.soilHumidity}% humidité, ${sensorData.soilTemperature}°C`
+      `🌱 [SIMULATION] Sol: ${sensorData.soil_humidity || 0}% humidité, ${
+        sensorData.temperature || 0
+      }°C`
     );
-    if (sensorData.soilHumidity < 15) {
+    if ((sensorData.soil_humidity || 0) < 15) {
       console.log(
-        `🚨 [SIMULATION] Anomalie détectée: Sécheresse (humidité ${sensorData.soilHumidity}%)`
+        `🚨 [SIMULATION] Anomalie détectée: Sécheresse (humidité ${
+          sensorData.soil_humidity || 0
+        }%)`
       );
     }
   }
@@ -385,14 +374,18 @@ export class N8nService {
 
     const recommendations: CropRecommendation[] = [
       {
+        id: 1,
+        farm_id: farmId,
         crop: "Sorgho",
-        confidence: 94,
+        ai_confidence: 94,
         reason: "Résistant à la sécheresse, adapté aux conditions actuelles",
         plantingDate: "2025-06-20",
       },
       {
+        id: 2,
+        farm_id: farmId,
         crop: "Mil",
-        confidence: 87,
+        ai_confidence: 87,
         reason: "Excellente résistance à la chaleur",
         plantingDate: "2025-06-25",
       },

@@ -3,32 +3,14 @@
 import { useState, useEffect } from "react";
 import { database } from "@/lib/database";
 import type {
-  Farm,
   ClimateEvent,
-  InsurancePayment,
   AIAgent,
-} from "@/lib/database";
+  CropRecommendation,
+  SensorData,
+  RiskPrediction,
+  DashboardData,
+} from "@/lib/types";
 import { useAuth } from "@/components/auth/auth-provider";
-
-interface SensorData {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface RiskPrediction {
-  id: number;
-  [key: string]: unknown;
-}
-
-interface DashboardData {
-  farms: Farm[];
-  payments: InsurancePayment[];
-  agents: AIAgent[];
-  climateEvents: ClimateEvent[];
-  recommendations: unknown[];
-  sensorData: SensorData[];
-  riskPredictions: RiskPrediction[];
-}
 
 interface DashboardDataResult {
   data: DashboardData | null;
@@ -58,7 +40,7 @@ export function useDashboardData(): DashboardDataResult {
       ]);
 
       let climateEvents: ClimateEvent[] = [];
-      let recommendations: unknown[] = [];
+      let recommendations: CropRecommendation[] = [];
       let sensorData: SensorData[] = [];
       let riskPredictions: RiskPrediction[] = [];
 
@@ -74,8 +56,8 @@ export function useDashboardData(): DashboardDataResult {
 
         climateEvents = events;
         recommendations = recs;
-        sensorData = sensors as SensorData[];
-        riskPredictions = risks as RiskPrediction[];
+        sensorData = sensors;
+        riskPredictions = risks;
       }
 
       setData({

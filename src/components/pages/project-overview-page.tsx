@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -67,7 +67,7 @@ interface SystemStatus {
   api: "operational" | "degraded" | "down";
 }
 
-export function ProjectOverviewPage(): JSX.Element {
+export function ProjectOverviewPage(): React.JSX.Element {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("timeline");
   const [projectEvents, setProjectEvents] = useState<ProjectEvent[]>([]);
@@ -342,7 +342,7 @@ export function ProjectOverviewPage(): JSX.Element {
             const latestPrediction = predictions[0];
             events.push({
               id: "ai-prediction",
-              timestamp: latestPrediction.created_at,
+              timestamp: latestPrediction.created_at ?? "",
               type: "integration",
               title: "Prédiction IA générée",
               description: `Risque ${latestPrediction.risk_type} détecté`,
@@ -494,7 +494,7 @@ export function ProjectOverviewPage(): JSX.Element {
     ]);
   };
 
-  const getStatusIcon = (status: string): JSX.Element => {
+  const getStatusIcon = (status: string): React.JSX.Element => {
     switch (status) {
       case "completed":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -507,7 +507,7 @@ export function ProjectOverviewPage(): JSX.Element {
     }
   };
 
-  const getTypeIcon = (type: string): JSX.Element => {
+  const getTypeIcon = (type: string): React.JSX.Element => {
     switch (type) {
       case "database":
         return <Database className="h-5 w-5 text-blue-600" />;
@@ -541,7 +541,7 @@ export function ProjectOverviewPage(): JSX.Element {
     }
   };
 
-  const getSystemStatusBadge = (status: string): JSX.Element => {
+  const getSystemStatusBadge = (status: string): React.JSX.Element => {
     switch (status) {
       case "connected":
         return (
@@ -593,7 +593,7 @@ export function ProjectOverviewPage(): JSX.Element {
   const formatEventDetails = (
     details: Record<string, unknown>,
     type: string
-  ): JSX.Element | null => {
+  ): React.JSX.Element | null => {
     if (!details) return null;
 
     switch (type) {
